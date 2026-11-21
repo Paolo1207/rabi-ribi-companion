@@ -1,0 +1,73 @@
+/* =====================================================
+   DESIGN TOKENS
+   Pastel pink / lavender / mint palette with a deep
+   plum "pixel outline", inspired by Rabi-Ribi's UI.
+===================================================== */
+
+:root {
+  /* Type */
+  --font-pixel: "Pixelify Sans Variable", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+
+  /* Surfaces */
+  --bg: #fdf0f8;
+  --bg-dot: rgba(185, 165, 239, 0.2);
+  --surface: #fffafd;
+  --surface-pink: #ffeaf5;
+  --surface-lavender: #f1eaff;
+  --surface-mint: #e4f9f0;
+  --surface-butter: #fff6d6;
+
+  /* Text (all pass 4.5:1 on --surface) */
+  --ink: #45305c;
+  --ink-soft: #6d5885;
+  --ink-faint: #a08cb8; /* decorative only */
+
+  /* Pixel outline + hard shadow */
+  --outline: #6a4a8a;
+  --outline-soft: #cdb9e8;
+  --drop: rgba(106, 74, 138, 0.3);
+
+  /* Accents */
+  --pink: #f9a8d0;
+  --pink-pale: #ffdcee;
+  --pink-deep: #c2457d;
+
+  --lavender: #c3b0f2;
+  --lavender-pale: #e8deff;
+  --lavender-deep: #6f52c4;
+
+  --mint: #a6e6cd;
+  --mint-pale: #d6f6e8;
+  --mint-deep: #1d7558;
+
+  --butter: #ffe69c;
+  --butter-pale: #fff2c2;
+  --butter-deep: #8a5c0e;
+
+  --sky: #b4dcff;
+  --sky-pale: #e0f2ff;
+
+  --danger: #d44a74;
+  --danger-pale: #ffdfe8;
+
+  /* Metrics */
+  --px: 3px; /* one "pixel" of outline */
+  --gap: 16px;
+  --page-pad: 28px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (max-width: 760px) {
+  :root {
+    --page-pad: 20px;
+    --gap: 14px;
+  }
+}
+
+@media (max-width: 520px) {
+  :root {
+    --page-pad: 14px;
+    --gap: 12px;
+  }
+}
