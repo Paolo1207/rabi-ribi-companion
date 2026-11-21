@@ -429,7 +429,10 @@ useEffect(() => {
               <div>
                 <span className="eyebrow">YOUR ADVENTURE STARTS HERE</span>
                 <h1>Welcome, Adventurer!</h1>
-                <p>Your personal companion for your Rabi-Ribi journey.</p>
+                <p>
+                  Your personal companion for your{" "}
+                  <span className="nowrap">Rabi-Ribi</span> journey.
+                </p>
               </div>
 
               <div className="rabbit-mascot" aria-hidden="true">

@@ -93,6 +93,10 @@ button {
   background: var(--pink-pale);
 }
 
+.nowrap {
+  white-space: nowrap;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
