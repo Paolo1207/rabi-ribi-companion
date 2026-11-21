@@ -14,6 +14,7 @@ type FileSelectProps = {
   slots: FileSelectSlot[];
   loading: boolean;
   error: string;
+  onSelect: (save: FileSelectSlot) => void;
 };
 
 function formatModified(seconds: number): string {
@@ -24,7 +25,9 @@ function formatRelative(seconds: number): string | null {
   if (seconds <= 0) return null;
 
   const diffSeconds = seconds - Date.now() / 1000;
-  const formatter = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+  const formatter = new Intl.RelativeTimeFormat(undefined, {
+    numeric: "auto",
+  });
 
   const units: [Intl.RelativeTimeFormatUnit, number][] = [
     ["year", 31536000],
@@ -43,7 +46,12 @@ function formatRelative(seconds: number): string | null {
   return "just now";
 }
 
-function FileSelect({ slots, loading, error }: FileSelectProps) {
+function FileSelect({
+  slots,
+  loading,
+  error,
+  onSelect,
+}: FileSelectProps) {
   const latestSlot = useMemo(() => {
     if (slots.length === 0) return null;
 
@@ -60,6 +68,11 @@ function FileSelect({ slots, loading, error }: FileSelectProps) {
     selectedSlot !== null && slots.some((save) => save.slot === selectedSlot)
       ? selectedSlot
       : latestSlot;
+
+  function selectSave(save: FileSelectSlot) {
+    setSelectedSlot(save.slot);
+    onSelect(save);
+  }
 
   function moveCursor(nextIndex: number) {
     const target = slots[nextIndex];
@@ -87,17 +100,29 @@ function FileSelect({ slots, loading, error }: FileSelectProps) {
         event.preventDefault();
         moveCursor(Math.min(slots.length - 1, currentIndex + 1));
         break;
+
       case "ArrowUp":
         event.preventDefault();
         moveCursor(Math.max(0, currentIndex - 1));
         break;
+
       case "Home":
         event.preventDefault();
         moveCursor(0);
         break;
+
       case "End":
         event.preventDefault();
         moveCursor(slots.length - 1);
+        break;
+
+      case "Enter":
+      case " ":
+        event.preventDefault();
+        {
+          const target = slots.find((save) => save.slot === activeSlot);
+          if (target) selectSave(target);
+        }
         break;
     }
   }
@@ -163,11 +188,16 @@ function FileSelect({ slots, loading, error }: FileSelectProps) {
                 <li
                   key={save.slot}
                   id={`file-slot-${save.slot}`}
-                  className={`pixel fs-row ${isSelected ? "selected" : ""} ${save.thumbnailUrl ? "has-thumbnail" : "no-thumbnail"}`}
+                  className={`pixel fs-row ${isSelected ? "selected" : ""} ${
+                    save.thumbnailUrl ? "has-thumbnail" : "no-thumbnail"
+                  }`}
                   role="option"
                   aria-selected={isSelected}
-                  style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
-                  onClick={() => setSelectedSlot(save.slot)}
+                  style={{
+                    animationDelay: `${Math.min(index, 8) * 45}ms`,
+                    cursor: "pointer",
+                  }}
+                  onClick={() => selectSave(save)}
                 >
                   <span className="fs-cursor" aria-hidden="true">
                     <PixelIcon name="cursor" />
@@ -196,7 +226,9 @@ function FileSelect({ slots, loading, error }: FileSelectProps) {
 
                     <p className="fs-modified">
                       Last modified: {formatModified(save.last_modified)}
-                      {relative && <span className="fs-relative">{relative}</span>}
+                      {relative && (
+                        <span className="fs-relative">{relative}</span>
+                      )}
                     </p>
                   </div>
                 </li>
@@ -212,6 +244,9 @@ function FileSelect({ slots, loading, error }: FileSelectProps) {
             <span>
               <kbd>Home</kbd>
               <kbd>End</kbd> Jump
+            </span>
+            <span>
+              <kbd>Enter</kbd> Open save
             </span>
           </div>
         </>

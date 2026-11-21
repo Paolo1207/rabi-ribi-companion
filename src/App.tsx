@@ -124,6 +124,7 @@ function App() {
   const [noteContent, setNoteContent] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Note | null>(null);
+  const [selectedSave, setSelectedSave] = useState<SaveSlot | null>(null);
 
   // Save notes
   useEffect(() => {
@@ -594,21 +595,146 @@ useEffect(() => {
           </section>
         )}
 
-        {/* PLAYTHROUGHS */}
+             {/* PLAYTHROUGHS */}
         {activePage === "Playthroughs" && (
           <section className="page">
-            <span className="eyebrow">YOUR ADVENTURES</span>
-            <h1>Playthroughs</h1>
+            {selectedSave ? (
+              <>
+                <div className="playthrough-heading">
+                  <button
+                    className="back-button pixel"
+                    onClick={() => setSelectedSave(null)}
+                    type="button"
+                  >
+                    <PixelIcon name="cursor" />
+                    <span>BACK TO SAVE SELECTION</span>
+                  </button>
 
-            <p className="notes-description">
-              View your Rabi-Ribi save files and their saved thumbnails.
-            </p>
+                  <span className="eyebrow">YOUR ADVENTURE</span>
+                  <h1>Playthrough Details</h1>
+                  <p className="notes-description">
+                    Details for Save Slot {selectedSave.slot}.
+                  </p>
+                </div>
 
-            <FileSelect
-              slots={saveSlots}
-              loading={saveLoading}
-              error={saveError}
-            />
+                <div className="pixel playthrough-summary">
+                  <div>
+                    <span className="eyebrow">SELECTED SAVE</span>
+                    <h2>Save Slot {selectedSave.slot}</h2>
+                    <p>{selectedSave.file_name}</p>
+                  </div>
+
+                  <div className="playthrough-mode">
+                    <span>GAME MODE</span>
+                    <strong>{selectedSave.game_mode}</strong>
+                  </div>
+                </div>
+
+                <h2 className="section-title">Adventure Progress</h2>
+
+                <div className="stats-grid">
+                  <div className="pixel stat-card tone-pink">
+                    <span className="stat-icon">
+                      <PixelIcon name="book" />
+                    </span>
+                    <p>CHAPTER</p>
+                    <h2>Chapter 1</h2>
+                    <span>Placeholder data</span>
+                  </div>
+
+                  <div className="pixel stat-card tone-lavender">
+                    <span className="stat-icon">
+                      <PixelIcon name="game" />
+                    </span>
+                    <p>CURRENT AREA</p>
+                    <h2>Rabi-Ribi Town</h2>
+                    <span>Placeholder data</span>
+                  </div>
+
+                  <div className="pixel stat-card tone-butter">
+                    <span className="stat-icon">
+                      <PixelIcon name="star" />
+                    </span>
+                    <p>DIFFICULTY</p>
+                    <h2>Normal</h2>
+                    <span>Placeholder data</span>
+                  </div>
+                </div>
+
+                <h2 className="section-title">Character Status</h2>
+
+                <div className="stats-grid">
+                  <div className="pixel stat-card tone-mint">
+                    <span className="stat-icon">
+                      <PixelIcon name="heart" />
+                    </span>
+                    <p>HEALTH (HP)</p>
+                    <h2>500 / 500</h2>
+                    <span>Placeholder data</span>
+                  </div>
+
+                  <div className="pixel stat-card tone-lavender">
+                    <span className="stat-icon">
+                      <PixelIcon name="star" />
+                    </span>
+                    <p>MANA (MP)</p>
+                    <h2>100 / 100</h2>
+                    <span>Placeholder data</span>
+                  </div>
+                </div>
+
+                <h2 className="section-title">Completion</h2>
+
+                <div className="pixel completion-panel">
+                  <div className="completion-item">
+                    <div className="completion-heading">
+                      <strong>Map Completion</strong>
+                      <span>25%</span>
+                    </div>
+                    <div className="completion-track">
+                      <div
+                        className="completion-fill map-fill"
+                        style={{ width: "25%" }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="completion-item">
+                    <div className="completion-heading">
+                      <strong>Item Completion</strong>
+                      <span>40%</span>
+                    </div>
+                    <div className="completion-track">
+                      <div
+                        className="completion-fill item-fill"
+                        style={{ width: "40%" }}
+                      />
+                    </div>
+                  </div>
+
+                  <p className="placeholder-notice">
+                    These statistics are examples only. Actual save-file
+                    information will be implemented later.
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="eyebrow">YOUR ADVENTURES</span>
+                <h1>Playthroughs</h1>
+
+                <p className="notes-description">
+                  Select a save file to view its playthrough details.
+                </p>
+
+                <FileSelect
+                  slots={saveSlots}
+                  loading={saveLoading}
+                  error={saveError}
+                  onSelect={setSelectedSave}
+                />
+              </>
+            )}
           </section>
         )}
 
