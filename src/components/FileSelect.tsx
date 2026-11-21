@@ -1,12 +1,13 @@
+
 import { useMemo, useState, type KeyboardEvent } from "react";
 import { PixelIcon } from "./PixelIcon";
 
-// Structurally compatible with the SaveSlot type in App.tsx.
 export type FileSelectSlot = {
   slot: number;
   file_name: string;
   last_modified: number;
   thumbnailUrl?: string | null;
+  game_mode: string;
 };
 
 type FileSelectProps = {
@@ -19,7 +20,6 @@ function formatModified(seconds: number): string {
   return seconds > 0 ? new Date(seconds * 1000).toLocaleString() : "Unknown";
 }
 
-// "2 days ago", "yesterday", ... derived from the real file timestamp.
 function formatRelative(seconds: number): string | null {
   if (seconds <= 0) return null;
 
@@ -44,8 +44,6 @@ function formatRelative(seconds: number): string | null {
 }
 
 function FileSelect({ slots, loading, error }: FileSelectProps) {
-  // The cursor starts on the most recently modified save, like a game's
-  // file-select screen resuming on your last file.
   const latestSlot = useMemo(() => {
     if (slots.length === 0) return null;
 
@@ -57,6 +55,7 @@ function FileSelect({ slots, loading, error }: FileSelectProps) {
   }, [slots]);
 
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+
   const activeSlot =
     selectedSlot !== null && slots.some((save) => save.slot === selectedSlot)
       ? selectedSlot
@@ -164,7 +163,7 @@ function FileSelect({ slots, loading, error }: FileSelectProps) {
                 <li
                   key={save.slot}
                   id={`file-slot-${save.slot}`}
-                  className={`pixel fs-row ${isSelected ? "selected" : ""}`}
+                  className={`pixel fs-row ${isSelected ? "selected" : ""} ${save.thumbnailUrl ? "has-thumbnail" : "no-thumbnail"}`}
                   role="option"
                   aria-selected={isSelected}
                   style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
@@ -174,19 +173,14 @@ function FileSelect({ slots, loading, error }: FileSelectProps) {
                     <PixelIcon name="cursor" />
                   </span>
 
-                  <div className="fs-thumb">
-                    {save.thumbnailUrl ? (
+                  {save.thumbnailUrl && (
+                    <div className="fs-thumb">
                       <img
                         src={save.thumbnailUrl}
                         alt={`Rabi-Ribi Save Slot ${save.slot} thumbnail`}
                       />
-                    ) : (
-                      <span className="fs-thumb-empty">
-                        <PixelIcon name="star" />
-                        No thumbnail available
-                      </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   <div className="fs-info">
                     <div className="fs-headline">
@@ -195,6 +189,10 @@ function FileSelect({ slots, loading, error }: FileSelectProps) {
                     </div>
 
                     <p className="fs-file">File: {save.file_name}</p>
+
+                    <p className="fs-file">
+                      Game Mode: <strong>{save.game_mode}</strong>
+                    </p>
 
                     <p className="fs-modified">
                       Last modified: {formatModified(save.last_modified)}

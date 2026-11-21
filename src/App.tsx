@@ -33,6 +33,7 @@ type SaveSlot = {
   last_modified: number;
   thumbnail: number[] | null;
   thumbnailUrl?: string | null;
+  game_mode: string;
 };
 
 const pageIcons: Record<Page, PixelIconName> = {

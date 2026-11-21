@@ -1,6 +1,7 @@
 
 use serde::Serialize;
-use std::fs;
+use std::fs::{self, File};
+use std::io::{Read, Seek, SeekFrom};
 use std::path::PathBuf;
 use sysinfo::{ProcessesToUpdate, System};
 
@@ -10,15 +11,17 @@ const RABI_RIBI_EXE: &str =
 const SAVE_FOLDER: &str =
     r"C:\Program Files (x86)\Steam\steamapps\common\Rabi-Ribi\save";
 
+const SPEEDRUN_FLAG_OFFSET: u64 = 0x9A2C;
+
 #[derive(Serialize)]
 struct SaveSlot {
     slot: u32,
     file_name: String,
     last_modified: u64,
     thumbnail: Option<Vec<u8>>,
+    game_mode: String,
 }
 
-// Keep the original command
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
@@ -37,6 +40,27 @@ fn check_rabi_ribi() -> bool {
                 .eq_ignore_ascii_case(RABI_RIBI_EXE)
         })
     })
+}
+
+// Read the documented Speedrun flag from the save file
+fn detect_game_mode(path: &PathBuf) -> String {
+    let result = (|| -> std::io::Result<u32> {
+        let mut file = File::open(path)?;
+
+        file.seek(SeekFrom::Start(SPEEDRUN_FLAG_OFFSET))?;
+
+        let mut bytes = [0u8; 4];
+        file.read_exact(&mut bytes)?;
+
+        Ok(u32::from_le_bytes(bytes))
+    })();
+
+    match result {
+        Ok(0) => "Story Mode / Story Mode 2 (unclassified)".to_string(),
+        Ok(1) => "Speedrun Mode".to_string(),
+        Ok(value) => format!("Unknown (flag: {})", value),
+        Err(_) => "Unknown".to_string(),
+    }
 }
 
 // Find Rabi-Ribi save files and their thumbnails
@@ -79,18 +103,25 @@ fn get_save_slots() -> Result<Vec<SaveSlot>, String> {
             .map(|duration| duration.as_secs())
             .unwrap_or(0);
 
-        let thumbnail_file = image_path.join(format!("save{}_a.bmp", slot_number));
+        // Only the autosave slot (0) has a thumbnail
+        let thumbnail = if slot_number == 0 {
+            fs::read(image_path.join("save0_a.bmp")).ok()
+        } else {
+            None
+        };
 
-        let thumbnail = fs::read(&thumbnail_file).ok();
+        let game_mode = detect_game_mode(&path);
 
         slots.push(SaveSlot {
             slot: slot_number,
             file_name: file_name.to_string(),
             last_modified,
             thumbnail,
+            game_mode,
         });
     }
 
+    // Autosave first, followed by manual slots in numeric order
     slots.sort_by_key(|save| save.slot);
 
     Ok(slots)
