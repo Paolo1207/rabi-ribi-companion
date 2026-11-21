@@ -1,0 +1,246 @@
+/* =====================================================
+   BASE — reset, typography, shared pixel primitives
+===================================================== */
+
+:root {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  /* Pixelify Sans' "fi" ligature renders as a stray glyph, so keep letters separate */
+  font-variant-ligatures: none;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background-color: var(--bg);
+  /* faint pixel dot grid */
+  background-image: radial-gradient(var(--bg-dot) 1.5px, transparent 1.6px);
+  background-size: 14px 14px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--pink);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 3px dashed var(--lavender-deep);
+  outline-offset: 4px;
+}
+
+/* Pixel scrollbars (WebView2 / Chromium) */
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--lavender-pale);
+  border-left: 2px solid var(--outline-soft);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--pink);
+  border: 3px solid var(--outline);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--pink-pale);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Pixel icon ---------- */
+
+.px-icon {
+  width: 1.25em;
+  height: 1.25em;
+  flex-shrink: 0;
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* ---------- Pixel surface ----------
+   A flat fill with a 3px plum outline whose corners are notched,
+   a soft top bevel and a hard drop shadow underneath. Colours come
+   from --fill and --edge so any element can restyle itself. */
+
+.pixel {
+  --fill: var(--surface);
+  --edge: var(--outline);
+  background: var(--fill);
+  border: 0;
+  border-radius: 0;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    0 calc(var(--px) * 2) 0 0 var(--drop),
+    inset 0 3px 0 0 rgba(255, 255, 255, 0.7);
+}
+
+/* Colour "tones" used by cards, tiles and notes */
+.tone-pink {
+  --tone: var(--pink);
+  --tone-pale: var(--surface-pink);
+  --tone-deep: var(--pink-deep);
+}
+
+.tone-lavender {
+  --tone: var(--lavender);
+  --tone-pale: var(--surface-lavender);
+  --tone-deep: var(--lavender-deep);
+}
+
+.tone-mint {
+  --tone: var(--mint);
+  --tone-pale: var(--surface-mint);
+  --tone-deep: var(--mint-deep);
+}
+
+.tone-butter {
+  --tone: var(--butter);
+  --tone-pale: var(--surface-butter);
+  --tone-deep: var(--butter-deep);
+}
+
+/* ---------- Motion ---------- */
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes cursorBob {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes blink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(26px);
+  }
+}
+
+@keyframes hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

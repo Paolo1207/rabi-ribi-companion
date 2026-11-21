@@ -1,0 +1,520 @@
+/* =====================================================
+   COMPONENTS — headings, cards, buttons, forms, modals
+===================================================== */
+
+/* ---------- Page headings ---------- */
+
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-pixel);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--pink-deep);
+}
+
+.page > h1 {
+  margin: 8px 0 8px;
+  font-size: 36px;
+  text-shadow: 2px 2px 0 var(--pink-pale);
+}
+
+.notes-description {
+  max-width: 62ch;
+  margin-bottom: 26px;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 34px 0 18px;
+  font-size: 21px;
+}
+
+.section-title::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  background: var(--pink);
+  box-shadow:
+    0 0 0 3px var(--outline),
+    14px 0 0 -2px var(--lavender),
+    28px 0 0 -4px var(--mint);
+  margin-right: 28px;
+}
+
+/* A .section-title that wraps an <h2> (Session History) */
+.section-title > h2 {
+  margin: 0;
+  font-size: inherit;
+}
+
+/* ---------- Stat cards ---------- */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  gap: calc(var(--gap) + 4px);
+}
+
+.stat-card {
+  --fill: var(--tone-pale, var(--surface));
+  position: relative;
+  min-width: 0;
+  padding: 20px 20px 18px;
+  animation: popIn 0.42s var(--ease) both;
+  transition: transform 0.2s var(--ease);
+}
+
+.stats-grid > .stat-card:nth-child(2) {
+  animation-delay: 0.06s;
+}
+
+.stats-grid > .stat-card:nth-child(3) {
+  animation-delay: 0.12s;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.stat-icon {
+  --icon-accent: #fff;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+  color: var(--ink);
+  font-size: 24px;
+  background: var(--tone, var(--pink));
+  box-shadow: 0 0 0 var(--px) var(--outline);
+}
+
+.stat-card > p:first-of-type {
+  margin-bottom: 6px;
+  font-family: var(--font-pixel);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+}
+
+.stat-card h2 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  overflow-wrap: anywhere;
+}
+
+.stat-card > span:last-child {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.large-card {
+  max-width: 680px;
+}
+
+.empty-notes {
+  max-width: 560px;
+  padding: 34px 28px;
+  text-align: center;
+}
+
+.empty-notes .stat-icon {
+  margin: 0 auto 14px;
+}
+
+.empty-notes p {
+  margin-bottom: 0;
+  color: var(--ink-soft);
+}
+
+/* ---------- Quick access tiles ---------- */
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: calc(var(--gap) + 4px);
+}
+
+.quick-tile {
+  --fill: var(--tone-pale);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding: 18px;
+  text-align: left;
+  color: var(--ink);
+  animation: popIn 0.42s var(--ease) both;
+  transition:
+    transform 0.18s var(--ease),
+    background-color 0.18s var(--ease);
+}
+
+.quick-grid > .quick-tile:nth-child(2) {
+  animation-delay: 0.05s;
+}
+
+.quick-grid > .quick-tile:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.quick-grid > .quick-tile:nth-child(4) {
+  animation-delay: 0.15s;
+}
+
+.quick-tile .stat-icon {
+  transition: transform 0.2s var(--ease);
+}
+
+.quick-tile:hover {
+  --fill: #fff;
+  transform: translateY(-4px);
+}
+
+.quick-tile:hover .stat-icon {
+  transform: rotate(-6deg) scale(1.08);
+}
+
+.quick-tile:active {
+  transform: translateY(1px);
+}
+
+.quick-tile strong {
+  font-family: var(--font-pixel);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.quick-tile small {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* ---------- Buttons ---------- */
+
+.save-note-button,
+.cancel-note-button,
+.confirm-delete-button,
+.clear-history-button,
+.note-card-actions button {
+  --fill: var(--pink);
+  --edge: var(--outline);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--fill);
+  border: 0;
+  border-radius: 0;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    0 calc(var(--px) * 2) 0 0 var(--drop),
+    inset 0 3px 0 0 rgba(255, 255, 255, 0.55),
+    inset 0 -4px 0 0 rgba(106, 74, 138, 0.18);
+  transition:
+    transform 0.12s var(--ease),
+    filter 0.15s ease;
+}
+
+.save-note-button:hover,
+.cancel-note-button:hover,
+.confirm-delete-button:hover,
+.clear-history-button:hover,
+.note-card-actions button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.save-note-button:active,
+.cancel-note-button:active,
+.confirm-delete-button:active,
+.clear-history-button:active,
+.note-card-actions button:active {
+  transform: translateY(2px);
+}
+
+.cancel-note-button,
+.note-card-actions button {
+  --fill: var(--lavender-pale);
+}
+
+.note-card-actions button {
+  padding: 6px 14px;
+  font-size: 14px;
+}
+
+.confirm-delete-button,
+.clear-history-button,
+.note-card-actions .delete-note-button {
+  --fill: var(--danger-pale);
+  --edge: var(--danger);
+  color: #8a1f45;
+}
+
+.confirm-delete-button {
+  --fill: var(--danger);
+  color: #fff;
+}
+
+/* ---------- Forms (Notes editor + edit modal) ---------- */
+
+.note-editor {
+  --fill: var(--surface-lavender);
+  max-width: 760px;
+  padding: 24px;
+  animation: popIn 0.42s var(--ease) both;
+}
+
+.note-editor h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.note-editor label,
+.modal-window label {
+  display: block;
+  margin: 16px 0 8px;
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+.note-input,
+.note-textarea {
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 15px;
+  color: var(--ink);
+  background: #fff;
+  border: 0;
+  border-radius: 0;
+  box-shadow:
+    0 0 0 3px var(--outline-soft),
+    inset 0 3px 0 0 rgba(106, 74, 138, 0.08);
+  outline: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.note-input::placeholder,
+.note-textarea::placeholder {
+  color: var(--ink-faint);
+}
+
+.note-input:focus,
+.note-textarea:focus {
+  box-shadow:
+    0 0 0 3px var(--outline),
+    4px 4px 0 3px var(--pink),
+    inset 0 3px 0 0 rgba(106, 74, 138, 0.08);
+}
+
+.note-textarea {
+  min-height: 130px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* ---------- Modals ---------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(69, 48, 92, 0.5);
+  backdrop-filter: blur(3px);
+  animation: modalFade 0.18s ease both;
+}
+
+.modal-window {
+  --fill: var(--surface);
+  width: 100%;
+  max-width: 460px;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  padding: 26px;
+  animation: popIn 0.24s var(--ease) both;
+}
+
+.edit-modal {
+  max-width: 620px;
+}
+
+.modal-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.modal-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  font-size: 22px;
+  background: var(--lavender);
+  box-shadow: 0 0 0 var(--px) var(--outline);
+}
+
+.modal-heading h2,
+.delete-modal h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.modal-heading p,
+.delete-modal p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.modal-close {
+  align-self: flex-start;
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink);
+  background: var(--lavender-pale);
+  border: 0;
+  box-shadow: 0 0 0 var(--px) var(--outline);
+  transition: background-color 0.15s ease, transform 0.12s var(--ease);
+}
+
+.modal-close:hover {
+  background: var(--pink);
+  transform: translateY(-1px);
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.delete-modal {
+  max-width: 410px;
+  padding: 30px;
+  text-align: center;
+}
+
+.delete-icon {
+  --fill: var(--danger-pale);
+  --edge: var(--danger);
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  margin: 4px auto 18px;
+  font-family: var(--font-pixel);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--danger);
+  background: var(--fill);
+  box-shadow: 0 0 0 var(--px) var(--edge);
+  animation: hop 1.6s steps(2, jump-none) infinite;
+}
+
+.delete-modal strong {
+  color: var(--pink-deep);
+  overflow-wrap: anywhere;
+}
+
+.delete-modal .modal-actions {
+  justify-content: center;
+}
+
+@keyframes modalFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- Small helpers ---------- */
+
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  background: var(--butter);
+  box-shadow: 0 0 0 2px var(--outline);
+}
+
+kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  padding: 0 5px;
+  font-family: var(--font-pixel);
+  font-size: 13px;
+  color: var(--ink);
+  background: #fff;
+  box-shadow:
+    0 0 0 2px var(--outline),
+    0 4px 0 0 var(--drop);
+}
+
+.loader {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.loader i {
+  width: 10px;
+  height: 10px;
+  background: var(--pink);
+  box-shadow: 0 0 0 2px var(--outline);
+  animation: hop 0.9s steps(2, jump-none) infinite;
+}
+
+.loader i:nth-child(2) {
+  background: var(--lavender);
+  animation-delay: 0.15s;
+}
+
+.loader i:nth-child(3) {
+  background: var(--mint);
+  animation-delay: 0.3s;
+}

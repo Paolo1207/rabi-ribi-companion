@@ -1,6 +1,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import FileSelect from "./components/FileSelect";
+import { PixelIcon, type PixelIconName } from "./components/PixelIcon";
 import "./App.css";
 
 type Page =
@@ -33,86 +35,16 @@ type SaveSlot = {
   thumbnailUrl?: string | null;
 };
 
-type IconName =
-  | "home"
-  | "game"
-  | "book"
-  | "note"
-  | "settings"
-  | "sparkles"
-  | "clock";
+const pageIcons: Record<Page, PixelIconName> = {
+  Dashboard: "home",
+  "Game Status": "game",
+  Playthroughs: "book",
+  "Session History": "clock",
+  Notes: "note",
+  Settings: "settings",
+};
 
-function AppIcon({ name }: { name: IconName }) {
-  return (
-    <svg
-      className="app-icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {name === "home" && (
-        <>
-          <path d="m3 10 9-7 9 7" />
-          <path d="M5 9v12h14V9" />
-          <path d="M9 21v-7h6v7" />
-        </>
-      )}
-
-      {name === "game" && (
-        <>
-          <rect x="3" y="6" width="18" height="13" rx="4" />
-          <path d="M8 10v5M5.5 12.5h5" />
-          <circle cx="16" cy="11" r="1" />
-          <circle cx="18.5" cy="14" r="1" />
-        </>
-      )}
-
-      {name === "book" && (
-        <>
-          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22z" />
-          <path d="M4 5.5v14A2.5 2.5 0 0 1 6.5 17H20" />
-          <path d="M9 7h7M9 11h7" />
-        </>
-      )}
-
-      {name === "note" && (
-        <>
-          <path d="M7 3h8l5 5v13H7a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z" />
-          <path d="M15 3v6h5M8 13h8M8 17h6" />
-        </>
-      )}
-
-      {name === "settings" && (
-        <>
-          <circle cx="12" cy="12" r="3" />
-          <path
-            d="m19.4 15 .1.1 1.2 1-1.5 2.6-1.5-.6a8 8 0 0 1-1.7 1l-.3 1.6h-3l-.3-1.6a8 8 0 0 1-1.7-1l-1.5.6-1.5-2.6 1.3-1a8 8 0 0 1 0-2l-1.3-1 1.5-2.6 1.5.6a8 8 0 0 1 1.7-1l.3-1.6h3l.3 1.6a8 8 0 0 1 1.7 1l1.5-.6 1.5 2.6-1.3 1a8 8 0 0 1 0 2z"
-            transform="translate(-1 -1)"
-          />
-        </>
-      )}
-
-      {name === "sparkles" && (
-        <>
-          <path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />
-          <path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" />
-          <path d="m5 2 .7 1.8L7.5 4.5l-1.8.7L5 7l-.7-1.8-1.8-.7 1.8-.7z" />
-        </>
-      )}
-
-      {name === "clock" && (
-        <>
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 7v5l3 2" />
-        </>
-      )}
-    </svg>
-  );
-}
+const noteTones = ["pink", "lavender", "mint", "butter"] as const;
 
 function formatPlaytime(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
@@ -134,6 +66,14 @@ function formatTime(date: string): string {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+function formatMonth(date: string): string {
+  return new Date(date).toLocaleDateString(undefined, { month: "short" });
+}
+
+function formatDay(date: string): string {
+  return String(new Date(date).getDate());
 }
 
 function App() {
@@ -425,11 +365,21 @@ useEffect(() => {
     0
   );
 
+  const detectionState = detectionError
+    ? "error"
+    : gameRunning === null
+      ? "checking"
+      : gameRunning
+        ? "running"
+        : "idle";
+
   return (
     <div className="app">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-icon">R</div>
+          <div className="pixel brand-icon" aria-hidden="true">
+            <PixelIcon name="bunny" />
+          </div>
           <div>
             <h2>Rabi-Ribi</h2>
             <span>COMPANION</span>
@@ -438,28 +388,16 @@ useEffect(() => {
 
         <div className="nav-label">MENU</div>
 
-        <nav>
+        <nav aria-label="Main">
           {navigation.map((page) => (
             <button
               key={page}
               className={`nav-button ${activePage === page ? "active" : ""}`}
               onClick={() => setActivePage(page)}
+              title={page}
+              aria-current={activePage === page ? "page" : undefined}
             >
-              <AppIcon
-                name={
-                  page === "Dashboard"
-                    ? "home"
-                    : page === "Game Status"
-                      ? "game"
-                      : page === "Playthroughs"
-                        ? "book"
-                        : page === "Session History"
-                          ? "clock"
-                          : page === "Notes"
-                            ? "note"
-                            : "settings"
-                }
-              />
+              <PixelIcon name={pageIcons[page]} />
               <span>{page}</span>
             </button>
           ))}
@@ -474,16 +412,20 @@ useEffect(() => {
       <main className="main-content">
         <header className="topbar">
           <span>Rabi-Ribi Companion / {activePage}</span>
-          <div className="topbar-status">
+          <div
+            className="pixel topbar-status"
+            data-state={detectionState}
+            role="status"
+          >
             <div className="status-dot" />
-            Offline
+            Game: {gameStatusTitle}
           </div>
         </header>
 
         {/* DASHBOARD */}
         {activePage === "Dashboard" && (
           <section className="page">
-            <div className="welcome">
+            <div className="pixel welcome">
               <div>
                 <span className="eyebrow">YOUR ADVENTURE STARTS HERE</span>
                 <h1>Welcome, Adventurer!</h1>
@@ -507,21 +449,27 @@ useEffect(() => {
                 </div>
               </div>
 
-              <div className="welcome-decoration">♡</div>
+              <div className="welcome-decoration" aria-hidden="true">
+                <PixelIcon name="heart" />
+              </div>
             </div>
 
             <h2 className="section-title">Adventure Overview</h2>
 
             <div className="stats-grid">
-              <div className="stat-card">
-                <span className="stat-icon">◈</span>
+              <div className="pixel stat-card tone-mint">
+                <span className="stat-icon">
+                  <PixelIcon name="game" />
+                </span>
                 <p>GAME STATUS</p>
                 <h2>{gameStatusTitle}</h2>
                 <span>{gameStatusDescription}</span>
               </div>
 
-              <div className="stat-card">
-                <span className="stat-icon">◷</span>
+              <div className="pixel stat-card tone-lavender">
+                <span className="stat-icon">
+                  <PixelIcon name="clock" />
+                </span>
                 <p>TOTAL PLAYTIME</p>
                 <h2>{formatPlaytime(totalPlaytime)}</h2>
                 <span>
@@ -531,8 +479,10 @@ useEffect(() => {
                 </span>
               </div>
 
-              <div className="stat-card">
-                <span className="stat-icon">✧</span>
+              <div className="pixel stat-card tone-butter">
+                <span className="stat-icon">
+                  <PixelIcon name="star" />
+                </span>
                 <p>PERSONAL NOTES</p>
                 <h2>{notes.length}</h2>
                 <span>Your saved discoveries</span>
@@ -542,26 +492,46 @@ useEffect(() => {
             <h2 className="section-title">Quick Access</h2>
 
             <div className="quick-grid">
-              <button onClick={() => setActivePage("Game Status")}>
-                <span>◈</span>
+              <button
+                className="pixel quick-tile tone-mint"
+                onClick={() => setActivePage("Game Status")}
+              >
+                <span className="stat-icon">
+                  <PixelIcon name="game" />
+                </span>
                 <strong>Game Status</strong>
                 <small>Check your game detection</small>
               </button>
 
-              <button onClick={() => setActivePage("Playthroughs")}>
-                <span>▤</span>
+              <button
+                className="pixel quick-tile tone-pink"
+                onClick={() => setActivePage("Playthroughs")}
+              >
+                <span className="stat-icon">
+                  <PixelIcon name="book" />
+                </span>
                 <strong>Playthroughs</strong>
                 <small>Manage your adventures</small>
               </button>
 
-              <button onClick={() => setActivePage("Session History")}>
-                <span>◷</span>
+              <button
+                className="pixel quick-tile tone-lavender"
+                onClick={() => setActivePage("Session History")}
+              >
+                <span className="stat-icon">
+                  <PixelIcon name="clock" />
+                </span>
                 <strong>Session History</strong>
                 <small>Review your gaming sessions</small>
               </button>
 
-              <button onClick={() => setActivePage("Notes")}>
-                <span>✎</span>
+              <button
+                className="pixel quick-tile tone-butter"
+                onClick={() => setActivePage("Notes")}
+              >
+                <span className="stat-icon">
+                  <PixelIcon name="note" />
+                </span>
                 <strong>Personal Notes</strong>
                 <small>Keep track of discoveries</small>
               </button>
@@ -575,150 +545,68 @@ useEffect(() => {
             <span className="eyebrow">GAME MONITOR</span>
             <h1>Game Status</h1>
 
-            <div className="stat-card large-card">
-              <span className="stat-icon">◈</span>
+            <div className="pixel status-panel" data-state={detectionState}>
+              <div className="status-orb" aria-hidden="true">
+                {detectionError ? "!" : <PixelIcon name="game" />}
+              </div>
 
-              <h2>
-                {detectionError
-                  ? "Detection Error"
-                  : gameRunning === null
-                    ? "Checking Rabi-Ribi..."
+              <div className="status-body">
+                <h2>
+                  {detectionError
+                    ? "Detection Error"
+                    : gameRunning === null
+                      ? "Checking Rabi-Ribi..."
+                      : gameRunning
+                        ? "Rabi-Ribi is running!"
+                        : "Rabi-Ribi is not running"}
+                </h2>
+
+                <p>
+                  {detectionError
+                    ? "The companion could not communicate with the game detection command."
                     : gameRunning
-                      ? "Rabi-Ribi is running!"
-                      : "Rabi-Ribi is not running"}
-              </h2>
+                      ? "Your game has been detected. Enjoy your adventure!"
+                      : "Launch Rabi-Ribi through Steam or its executable. The companion will detect it automatically."}
+                </p>
 
-              <p>
-                {detectionError
-                  ? "The companion could not communicate with the game detection command."
-                  : gameRunning
-                    ? "Your game has been detected. Enjoy your adventure!"
-                    : "Launch Rabi-Ribi through Steam or its executable. The companion will detect it automatically."}
-              </p>
-
-              <p>Detection checks every 2 seconds.</p>
-              <p>Total recorded playtime: {formatPlaytime(totalPlaytime)}</p>
-
-              {gameRunning && (
-                <p>Current session: {formatPlaytime(sessionPlaytime)}</p>
-              )}
+                <dl className="status-facts">
+                  <div>
+                    <dt>Detection</dt>
+                    <dd>Checks every 2 seconds</dd>
+                  </div>
+                  <div>
+                    <dt>Total recorded playtime</dt>
+                    <dd>{formatPlaytime(totalPlaytime)}</dd>
+                  </div>
+                  {gameRunning && (
+                    <div>
+                      <dt>Current session</dt>
+                      <dd>{formatPlaytime(sessionPlaytime)}</dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
             </div>
           </section>
         )}
 
-       
-{/* PLAYTHROUGHS */}
-{activePage === "Playthroughs" && (
-  <section className="page">
-    <span className="eyebrow">YOUR ADVENTURES</span>
-    <h1>Playthroughs</h1>
+        {/* PLAYTHROUGHS */}
+        {activePage === "Playthroughs" && (
+          <section className="page">
+            <span className="eyebrow">YOUR ADVENTURES</span>
+            <h1>Playthroughs</h1>
 
-    <p className="notes-description">
-      View your Rabi-Ribi save files and their saved thumbnails.
-    </p>
+            <p className="notes-description">
+              View your Rabi-Ribi save files and their saved thumbnails.
+            </p>
 
-    {saveLoading ? (
-      <div className="stat-card large-card">
-        <h2>Checking save files...</h2>
-        <p>Looking inside your Rabi-Ribi save folder.</p>
-      </div>
-    ) : saveError ? (
-      <div className="stat-card large-card">
-        <h2>Unable to load save files</h2>
-        <p>{saveError}</p>
-      </div>
-    ) : saveSlots.length === 0 ? (
-      <div className="stat-card large-card">
-        <h2>No save files found</h2>
-        <p>
-          No Rabi-Ribi save files were found in your save folder.
-        </p>
-      </div>
-    ) : (
-      <>
-        <div className="stats-grid">
-          <div className="stat-card">
-            <span className="stat-icon">▤</span>
-            <p>DETECTED SAVE SLOTS</p>
-            <h2>{saveSlots.length}</h2>
-            <span>Available save files</span>
-          </div>
-        </div>
-
-        <h2 className="section-title">Your Saved Adventures</h2>
-
-        <div className="notes-grid">
-          {saveSlots.map((save) => {
-            const latestSave = saveSlots.reduce(
-              (latest, current) =>
-                current.last_modified > latest.last_modified
-                  ? current
-                  : latest,
-              saveSlots[0]
-            );
-
-            const isLatest = save.slot === latestSave.slot;
-
-            return (
-              <article className="note-card" key={save.slot}>
-                {save.thumbnailUrl ? (
-                  <img
-                    src={save.thumbnailUrl}
-                    alt={`Rabi-Ribi Save Slot ${save.slot} thumbnail`}
-                    style={{
-                      width: "100%",
-                      aspectRatio: "16 / 9",
-                      objectFit: "contain",
-                      borderRadius: "12px",
-                      background: "#f5edf4",
-                      marginBottom: "15px",
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: "100%",
-                      aspectRatio: "16 / 9",
-                      borderRadius: "12px",
-                      background: "#f5edf4",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: "15px",
-                      color: "#a58a9e",
-                    }}
-                  >
-                    No thumbnail available
-                  </div>
-                )}
-
-                <h3>Save Slot {save.slot}</h3>
-
-                {isLatest && (
-                  <span className="eyebrow">LAST SAVED</span>
-                )}
-
-                <p className="note-card-content">
-                  File: {save.file_name}
-                </p>
-
-                <small>
-                  Last modified:{" "}
-                  {save.last_modified > 0
-                    ? new Date(
-                        save.last_modified * 1000
-                      ).toLocaleString()
-                    : "Unknown"}
-                </small>
-              </article>
-            );
-          })}
-        </div>
-      </>
-    )}
-  </section>
-)}
-
+            <FileSelect
+              slots={saveSlots}
+              loading={saveLoading}
+              error={saveError}
+            />
+          </section>
+        )}
 
         {/* SESSION HISTORY */}
         {activePage === "Session History" && (
@@ -730,15 +618,19 @@ useEffect(() => {
             </p>
 
             <div className="stats-grid">
-              <div className="stat-card">
-                <span className="stat-icon">◷</span>
+              <div className="pixel stat-card tone-lavender">
+                <span className="stat-icon">
+                  <PixelIcon name="clock" />
+                </span>
                 <p>RECORDED SESSIONS</p>
                 <h2>{sessions.length}</h2>
                 <span>Completed gaming sessions</span>
               </div>
 
-              <div className="stat-card">
-                <span className="stat-icon">⌛</span>
+              <div className="pixel stat-card tone-mint">
+                <span className="stat-icon">
+                  <PixelIcon name="hourglass" />
+                </span>
                 <p>RECORDED SESSION TIME</p>
                 <h2>{formatPlaytime(recordedSessionTime)}</h2>
                 <span>Time from saved session records</span>
@@ -750,8 +642,10 @@ useEffect(() => {
             </div>
 
             {sessions.length === 0 ? (
-              <div className="stat-card empty-notes">
-                <span className="stat-icon">◷</span>
+              <div className="pixel stat-card empty-notes tone-lavender">
+                <span className="stat-icon">
+                  <PixelIcon name="clock" />
+                </span>
                 <h2>No sessions recorded yet</h2>
                 <p>
                   Open Rabi-Ribi and play. Your session will appear here after
@@ -760,37 +654,38 @@ useEffect(() => {
               </div>
             ) : (
               <>
-                <div className="notes-grid">
+                <ul className="session-list">
                   {sessions.map((session) => (
-                    <article className="note-card" key={session.id}>
-                      <h3>{formatDate(session.startTime)}</h3>
+                    <li className="pixel session-row" key={session.id}>
+                      <div className="session-date" aria-hidden="true">
+                        <span>{formatMonth(session.startTime)}</span>
+                        <strong>{formatDay(session.startTime)}</strong>
+                      </div>
 
-                      <p className="note-card-content">
-                        Start: {formatTime(session.startTime)}
-                        {"\n"}
-                        End: {formatTime(session.endTime)}
-                      </p>
+                      <div className="session-main">
+                        <h3>{formatDate(session.startTime)}</h3>
+                        <p>
+                          Start: {formatTime(session.startTime)} · End:{" "}
+                          {formatTime(session.endTime)}
+                        </p>
+                        <small>Completed session</small>
+                      </div>
 
-                      <strong>
+                      <strong className="session-duration">
                         Duration: {formatPlaytime(session.duration)}
                       </strong>
-
-                      <small>Completed session</small>
-                    </article>
+                    </li>
                   ))}
-                </div>
+                </ul>
 
-             
-                <div className="note-actions">
+                <div className="note-actions session-actions">
                   <button
                     className="clear-history-button"
                     onClick={() => setShowClearHistory(true)}
                   >
-                  
                     Clear History
                   </button>
                 </div>
-
               </>
             )}
           </section>
@@ -806,7 +701,7 @@ useEffect(() => {
             </p>
 
             {!editingId && (
-              <div className="note-editor">
+              <div className="pixel note-editor">
                 <h2>Create a New Note</h2>
 
                 <label htmlFor="note-title">Note Title</label>
@@ -841,15 +736,20 @@ useEffect(() => {
             <h2 className="section-title">Saved Notes ({notes.length})</h2>
 
             {notes.length === 0 ? (
-              <div className="stat-card empty-notes">
-                <span className="stat-icon">✎</span>
+              <div className="pixel stat-card empty-notes tone-pink">
+                <span className="stat-icon">
+                  <PixelIcon name="note" />
+                </span>
                 <h2>No notes yet</h2>
                 <p>Your first adventure note will appear here.</p>
               </div>
             ) : (
               <div className="notes-grid">
-                {notes.map((note) => (
-                  <article className="note-card" key={note.id}>
+                {notes.map((note, index) => (
+                  <article
+                    className={`pixel note-card tone-${noteTones[index % noteTones.length]}`}
+                    key={note.id}
+                  >
                     <h3>{note.title}</h3>
                     <p className="note-card-content">{note.content}</p>
 
@@ -878,11 +778,16 @@ useEffect(() => {
           <section className="page">
             <span className="eyebrow">APPLICATION</span>
             <h1>Settings</h1>
-            <div className="stat-card large-card">
-              <h2>Rabi-Ribi Companion</h2>
-              <p>Version 0.1.0</p>
-              <p>Windows Desktop Application</p>
-              <p>Built with Tauri, React, TypeScript and Rust.</p>
+            <div className="pixel about-card">
+              <div className="about-logo" aria-hidden="true">
+                <PixelIcon name="bunny" />
+              </div>
+              <div>
+                <h2>Rabi-Ribi Companion</h2>
+                <p>Version 0.1.0</p>
+                <p>Windows Desktop Application</p>
+                <p>Built with Tauri, React, TypeScript and Rust.</p>
+              </div>
             </div>
           </section>
         )}
@@ -896,11 +801,13 @@ useEffect(() => {
       {editingId && (
         <div className="modal-backdrop" onClick={resetEditor}>
           <div
-            className="modal-window edit-modal"
+            className="pixel modal-window edit-modal"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="modal-heading">
-              <span className="modal-icon">✎</span>
+              <span className="modal-icon">
+                <PixelIcon name="note" />
+              </span>
               <div>
                 <h2>Edit Note</h2>
                 <p>Make changes to your adventure journal.</p>
@@ -949,7 +856,7 @@ useEffect(() => {
       {deleteTarget && (
         <div className="modal-backdrop" onClick={() => setDeleteTarget(null)}>
           <div
-            className="modal-window delete-modal"
+            className="pixel modal-window delete-modal"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="delete-icon">!</div>
@@ -985,7 +892,7 @@ useEffect(() => {
           onClick={() => setShowClearHistory(false)}
         >
           <div
-            className="modal-window delete-modal"
+            className="pixel modal-window delete-modal"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="delete-icon">!</div>

@@ -1,0 +1,574 @@
+/* =====================================================
+   PAGES — Dashboard, Game Status, Session History,
+   Notes, Settings
+===================================================== */
+
+/* ---------- Dashboard banner ---------- */
+
+.welcome {
+  --fill: var(--sky-pale);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 230px;
+  padding: 34px 250px 34px 36px; /* right padding reserves room for the mascot */
+  margin-bottom: 10px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, var(--sky) 0%, var(--sky-pale) 38%, var(--pink-pale) 100%);
+  animation: popIn 0.45s var(--ease) both;
+}
+
+/* Pixel clouds */
+.welcome::before,
+.welcome::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  pointer-events: none;
+  box-shadow:
+    8px 0 #fff, 16px 0 #fff,
+    -16px 8px #fff, -8px 8px #fff, 0 8px #fff, 8px 8px #fff, 16px 8px #fff, 24px 8px #fff, 32px 8px #fff, 40px 8px #fff,
+    -16px 16px #fff, -8px 16px #fff, 0 16px #fff, 8px 16px #fff, 16px 16px #fff, 24px 16px #fff, 32px 16px #fff, 40px 16px #fff;
+}
+
+.welcome::before {
+  top: 22px;
+  left: 62%;
+  opacity: 0.95;
+  animation: drift 9s ease-in-out infinite alternate;
+}
+
+.welcome::after {
+  top: 70px;
+  left: 80%;
+  opacity: 0.8;
+  transform: scale(0.7);
+  animation: drift 12s ease-in-out infinite alternate-reverse;
+}
+
+.welcome > div:first-child {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+}
+
+.welcome .eyebrow {
+  padding: 3px 10px;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--outline);
+  font-size: 12px;
+}
+
+.welcome h1 {
+  margin: 16px 0 8px;
+  font-size: 38px;
+  text-shadow: 3px 3px 0 #fff;
+}
+
+.welcome p {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.welcome-decoration {
+  position: absolute;
+  right: 22px;
+  bottom: 18px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  color: var(--pink-deep);
+  --icon-accent: #fff;
+  animation: hop 1.4s steps(2, jump-none) infinite;
+}
+
+/* Rabbit mascot (pure CSS, kept from the original design) */
+
+.rabbit-mascot {
+  position: absolute;
+  right: 110px;
+  bottom: 16px;
+  z-index: 2;
+  width: 100px;
+  height: 148px;
+  pointer-events: none;
+  animation: floaty 3s ease-in-out infinite;
+}
+
+.rabbit-ear {
+  position: absolute;
+  top: 0;
+  width: 29px;
+  height: 84px;
+  background: #fff;
+  border: 3px solid var(--outline);
+  border-radius: 50% 50% 42% 42%;
+}
+
+.rabbit-ear-left {
+  left: 19px;
+  transform: rotate(-13deg);
+}
+
+.rabbit-ear-right {
+  right: 19px;
+  transform: rotate(13deg);
+}
+
+.rabbit-ear-inner {
+  position: absolute;
+  top: 11px;
+  left: 6px;
+  width: 11px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--pink);
+}
+
+.rabbit-head {
+  position: absolute;
+  left: 7px;
+  bottom: 5px;
+  width: 86px;
+  height: 76px;
+  background: #fff;
+  border: 3px solid var(--outline);
+  border-radius: 46% 46% 43% 43%;
+  box-shadow: 0 5px 0 var(--drop);
+}
+
+.rabbit-eye {
+  position: absolute;
+  top: 29px;
+  width: 6px;
+  height: 10px;
+  background: var(--ink);
+  border-radius: 50%;
+}
+
+.rabbit-eye-left {
+  left: 23px;
+}
+
+.rabbit-eye-right {
+  right: 23px;
+}
+
+.rabbit-cheek {
+  position: absolute;
+  top: 43px;
+  width: 13px;
+  height: 7px;
+  background: var(--pink);
+  border-radius: 50%;
+}
+
+.rabbit-cheek-left {
+  left: 9px;
+}
+
+.rabbit-cheek-right {
+  right: 9px;
+}
+
+.rabbit-nose {
+  position: absolute;
+  top: 41px;
+  left: 37px;
+  width: 7px;
+  height: 6px;
+  background: var(--pink-deep);
+  border-radius: 50%;
+}
+
+/* ---------- Game Status ---------- */
+
+.status-panel {
+  --fill: var(--surface-lavender);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  max-width: 720px;
+  margin-top: 26px;
+  padding: 26px;
+  animation: popIn 0.42s var(--ease) both;
+}
+
+.status-panel[data-state="running"] {
+  --fill: var(--surface-mint);
+}
+
+.status-panel[data-state="checking"] {
+  --fill: var(--surface-butter);
+}
+
+.status-panel[data-state="error"] {
+  --fill: var(--danger-pale);
+}
+
+.status-orb {
+  --icon-accent: #fff;
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  font-size: 46px;
+  color: var(--ink);
+  background: var(--lavender);
+  box-shadow: 0 0 0 var(--px) var(--outline);
+}
+
+.status-panel[data-state="running"] .status-orb {
+  background: var(--mint);
+  animation: hop 1s steps(2, jump-none) infinite;
+}
+
+.status-panel[data-state="checking"] .status-orb {
+  background: var(--butter);
+  animation: blink 0.9s steps(1) infinite;
+}
+
+.status-panel[data-state="error"] .status-orb {
+  background: var(--danger);
+  color: #fff;
+}
+
+.status-body h2 {
+  margin: 2px 0 8px;
+  font-size: 28px;
+}
+
+.status-body > p {
+  margin-bottom: 18px;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+
+.status-facts {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  background: #fff;
+  box-shadow: 0 0 0 var(--px) var(--outline-soft);
+}
+
+.status-facts > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 16px;
+  padding: 11px 14px;
+}
+
+.status-facts > div + div {
+  border-top: 2px dashed var(--outline-soft);
+}
+
+.status-facts dt {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.status-facts dd {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: 17px;
+  color: var(--ink);
+}
+
+/* ---------- Session History ---------- */
+
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.session-row {
+  --fill: var(--surface);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 18px 14px 14px;
+  animation: popIn 0.4s var(--ease) both;
+  transition: transform 0.18s var(--ease);
+}
+
+.session-list > .session-row:nth-child(2) {
+  animation-delay: 0.04s;
+}
+
+.session-list > .session-row:nth-child(3) {
+  animation-delay: 0.08s;
+}
+
+.session-list > .session-row:nth-child(n + 4) {
+  animation-delay: 0.12s;
+}
+
+.session-row:hover {
+  transform: translateX(3px);
+}
+
+.session-date {
+  width: 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 0 8px;
+  text-align: center;
+  color: var(--ink);
+  background: var(--lavender-pale);
+  box-shadow: 0 0 0 var(--px) var(--outline);
+}
+
+.session-date span {
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lavender-deep);
+}
+
+.session-date strong {
+  font-family: var(--font-pixel);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.session-main {
+  min-width: 0;
+}
+
+.session-main h3 {
+  margin: 0 0 4px;
+  font-size: 19px;
+}
+
+.session-main p {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.session-main small {
+  font-size: 12px;
+  color: var(--mint-deep);
+  font-weight: 600;
+}
+
+.session-duration {
+  padding: 6px 12px;
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ink);
+  background: var(--mint);
+  box-shadow: 0 0 0 2px var(--outline);
+}
+
+.session-actions {
+  margin-top: 28px;
+}
+
+/* ---------- Notes ---------- */
+
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+  gap: calc(var(--gap) + 6px);
+}
+
+.note-card {
+  --fill: var(--tone-pale);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 24px 20px 18px;
+  animation: popIn 0.42s var(--ease) both;
+  transition: transform 0.2s var(--ease);
+}
+
+.notes-grid > .note-card:nth-child(2) {
+  animation-delay: 0.05s;
+}
+
+.notes-grid > .note-card:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.notes-grid > .note-card:nth-child(n + 4) {
+  animation-delay: 0.15s;
+}
+
+.note-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Little pixel "tape" on each note */
+.note-card::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 20px;
+  width: 54px;
+  height: 14px;
+  background: var(--tone);
+  box-shadow: 0 0 0 2px var(--outline);
+}
+
+.note-card h3 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+
+.note-card-content {
+  flex: 1;
+  margin-bottom: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.note-card small {
+  display: block;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.note-card-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* ---------- Settings ---------- */
+
+.about-card {
+  --fill: var(--surface-pink);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+  max-width: 680px;
+  margin-top: 26px;
+  padding: 26px;
+  animation: popIn 0.42s var(--ease) both;
+}
+
+.about-logo {
+  --icon-accent: #fff;
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  font-size: 50px;
+  color: var(--ink);
+  background: var(--pink);
+  box-shadow: 0 0 0 var(--px) var(--outline);
+  animation: hop 2.4s steps(2, jump-none) infinite;
+}
+
+.about-card h2 {
+  margin: 0 0 4px;
+  font-size: 26px;
+}
+
+.about-card p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+
+/* ---------- Responsive tweaks ---------- */
+
+@media (max-width: 980px) {
+  .welcome {
+    padding-right: 215px;
+  }
+
+  .rabbit-mascot {
+    right: 70px;
+    transform-origin: bottom right;
+    scale: 0.85;
+  }
+}
+
+@media (max-width: 760px) {
+  .page > h1 {
+    font-size: 30px;
+  }
+
+  .welcome {
+    min-height: 210px;
+    padding: 26px 190px 26px 24px;
+  }
+
+  .welcome h1 {
+    font-size: 30px;
+  }
+
+  .rabbit-mascot {
+    right: 52px;
+    scale: 0.8;
+  }
+}
+
+@media (max-width: 560px) {
+  .welcome {
+    padding: 22px 18px 150px;
+    align-items: flex-start;
+  }
+
+  .welcome h1 {
+    font-size: 26px;
+  }
+
+  .rabbit-mascot {
+    right: 50px;
+    scale: 0.7;
+  }
+
+  .status-panel,
+  .about-card {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 20px;
+  }
+
+  .status-orb,
+  .about-logo {
+    width: 68px;
+    height: 68px;
+    font-size: 38px;
+  }
+
+  .session-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .session-duration {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
