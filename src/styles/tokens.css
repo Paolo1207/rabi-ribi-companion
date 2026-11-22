@@ -5,9 +5,25 @@
 ===================================================== */
 
 :root {
-  /* Type */
-  --font-pixel: "Pixelify Sans Variable", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  /* Type system
+     Three voices, each with one job:
+       display — Pixelify Sans: page/card headings, buttons, navigation, big numbers
+       label   — Silkscreen:    tiny uppercase tags and captions-of-captions
+       body    — Nunito:        paragraphs, descriptions, form text, metadata
+     --font-pixel is kept as an alias of display for older rules. */
+  --font-display: "Pixelify Sans Variable", "Segoe UI", system-ui, sans-serif;
+  --font-label: "Silkscreen", "Pixelify Sans Variable", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Nunito Variable", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --font-pixel: var(--font-display);
+  --font-num: var(--font-display);
+
+  /* Scale (px) — Silkscreen is only legible above ~10px */
+  --fs-label: 11px;
+  --fs-caption: 13px;
+  --fs-body: 15px;
+  --fs-lead: 16px;
+  --fs-ui: 15px;
+  --track-label: 0.12em;
 
   /* Surfaces */
   --bg: #fdf0f8;
