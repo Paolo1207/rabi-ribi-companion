@@ -71,12 +71,27 @@
 
 .welcome p {
   margin: 0;
-  max-width: 34ch;
+  max-width: none;
   font-size: var(--fs-lead);
   color: var(--ink);
   font-family: var(--font-body);
   font-weight: 500;
   line-height: 1.6;
+}
+
+/* The tagline stays on one line whenever the window is wide enough for it
+   to sit beside the mascot; narrower windows let it wrap naturally. */
+@media (min-width: 1000px) {
+  .welcome p {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 999px) {
+  .welcome p {
+    max-width: 34ch;
+    text-wrap: balance;
+  }
 }
 
 .welcome-decoration {
@@ -281,7 +296,7 @@
 }
 
 .status-facts dt {
-  font-size: var(--fs-label);
+  font-size: var(--fs-label-lg);
   color: var(--ink-soft);
   font-family: var(--font-label);
   font-weight: 400;
@@ -684,7 +699,7 @@
 
 .playthrough-mode span {
   font-family: var(--font-label);
-  font-size: var(--fs-label);
+  font-size: var(--fs-label-lg);
   font-weight: 400;
   opacity: 0.8;
   letter-spacing: var(--track-label);

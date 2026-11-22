@@ -700,7 +700,7 @@ async function handleSelectSave(save: SaveSlot) {
                     onClick={handleBackToSaveSelection}
                     type="button"
                   >
-                    <PixelIcon name="cursor" />
+                    <PixelIcon name="arrow-left" />
                     <span>BACK TO SAVE SELECTION</span>
                   </button>
 

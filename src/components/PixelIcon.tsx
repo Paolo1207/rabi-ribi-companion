@@ -14,7 +14,8 @@ export type PixelIconName =
   | "carrot"
   | "bunny"
   | "hourglass"
-  | "cursor";
+  | "cursor"
+  | "arrow-left";
 
 const ART: Record<PixelIconName, string[]> = {
   home: [
@@ -168,6 +169,20 @@ const ART: Record<PixelIconName, string[]> = {
     "...#oooo#...",
     "..#oooooo#..",
     ".##########.",
+    "............",
+    "............",
+  ],
+  "arrow-left": [
+    "............",
+    "............",
+    "...#........",
+    "..##........",
+    ".###........",
+    "############",
+    "############",
+    ".###........",
+    "..##........",
+    "...#........",
     "............",
     "............",
   ],

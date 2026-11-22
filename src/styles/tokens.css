@@ -18,7 +18,8 @@
   --font-num: var(--font-display);
 
   /* Scale (px) — Silkscreen is only legible above ~10px */
-  --fs-label: 11px;
+  --fs-label: 11px; /* tiny tags: badges, nav group, key hints */
+  --fs-label-lg: 13px; /* card & field labels: CHAPTER, HEALTH (HP), ... */
   --fs-caption: 13px;
   --fs-body: 15px;
   --fs-lead: 16px;
