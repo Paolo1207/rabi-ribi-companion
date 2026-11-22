@@ -30,10 +30,38 @@ type PlaySession = {
 type SaveSlot = {
   slot: number;
   file_name: string;
+  path: string;
   last_modified: number;
   thumbnail: number[] | null;
   thumbnailUrl?: string | null;
   game_mode: string;
+};
+
+type LabeledValue = {
+  raw: number | null;
+  label: string | null;
+};
+
+type PlaythroughDetails = {
+  mode: string | null;
+  route: LabeledValue;
+  rules: LabeledValue;
+  chapter: number | null;
+  town_progress: number | null;
+  townProgress?: number | null;
+  hp: number | null;
+  mp: number | null;
+  map_completion: number | null;
+  mapCompletion?: number | null;
+  item_completion: number | null;
+  itemCompletion?: number | null;
+  difficulty: {
+    raw: number | null;
+    label: string | null;
+    copies_agree: boolean;
+    copiesAgree?: boolean;
+  };
+  warnings: string[];
 };
 
 const pageIcons: Record<Page, PixelIconName> = {
@@ -80,10 +108,17 @@ function formatDay(date: string): string {
 function App() {
   const [activePage, setActivePage] = useState<Page>("Dashboard");
 
-    // Rabi-Ribi save slots
+  // Rabi-Ribi save slots
   const [saveSlots, setSaveSlots] = useState<SaveSlot[]>([]);
   const [saveLoading, setSaveLoading] = useState(true);
   const [saveError, setSaveError] = useState("");
+
+  // Selected save and parsed playthrough details
+  const [selectedSave, setSelectedSave] = useState<SaveSlot | null>(null);
+  const [playthroughDetails, setPlaythroughDetails] =
+    useState<PlaythroughDetails | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState("");
 
   // Game detection
   const [gameRunning, setGameRunning] = useState<boolean | null>(null);
@@ -124,7 +159,66 @@ function App() {
   const [noteContent, setNoteContent] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Note | null>(null);
-  const [selectedSave, setSelectedSave] = useState<SaveSlot | null>(null);
+
+  // Load save details from the Rust backend.
+async function handleSelectSave(save: SaveSlot) {
+  setSelectedSave(save);
+  setPlaythroughDetails(null);
+  setDetailsError("");
+  setDetailsLoading(true);
+
+  try {
+    const rawDetails = await invoke<any>(
+      "read_playthrough_details",
+      { path: save.path }
+    );
+
+    const details: PlaythroughDetails = {
+      ...rawDetails,
+
+      town_progress:
+        rawDetails.town_progress ??
+        rawDetails.townProgress ??
+        null,
+
+      map_completion:
+        rawDetails.map_completion ??
+        rawDetails.mapCompletion ??
+        null,
+
+      item_completion:
+        rawDetails.item_completion ??
+        rawDetails.itemCompletion ??
+        null,
+
+      difficulty: {
+        ...rawDetails.difficulty,
+        copies_agree:
+          rawDetails.difficulty?.copies_agree ??
+          rawDetails.difficulty?.copiesAgree ??
+          false,
+      },
+
+      warnings: rawDetails.warnings ?? [],
+    };
+
+    console.log("Parsed playthrough details:", details);
+
+    setPlaythroughDetails(details);
+  } catch (error) {
+    console.error("Failed to load playthrough details:", error);
+    setDetailsError(String(error));
+  } finally {
+    setDetailsLoading(false);
+  }
+}
+
+  function handleBackToSaveSelection() {
+    setSelectedSave(null);
+    setPlaythroughDetails(null);
+    setDetailsError("");
+    setDetailsLoading(false);
+  }
 
   // Save notes
   useEffect(() => {
@@ -168,60 +262,60 @@ function App() {
   }, []);
 
   // Load Rabi-Ribi save slots
-useEffect(() => {
-  let isMounted = true;
-  let imageUrls: string[] = [];
+  useEffect(() => {
+    let isMounted = true;
+    let imageUrls: string[] = [];
 
-  async function loadSaveSlots() {
-    try {
-      setSaveLoading(true);
-      setSaveError("");
+    async function loadSaveSlots() {
+      try {
+        setSaveLoading(true);
+        setSaveError("");
 
-      const saves = await invoke<SaveSlot[]>("get_save_slots");
+        const saves = await invoke<SaveSlot[]>("get_save_slots");
 
-      const formattedSaves = saves.map((save) => {
-        let thumbnailUrl: string | null = null;
+        const formattedSaves = saves.map((save) => {
+          let thumbnailUrl: string | null = null;
 
-        if (save.thumbnail && save.thumbnail.length > 0) {
-          const imageBytes = new Uint8Array(save.thumbnail);
+          if (save.thumbnail && save.thumbnail.length > 0) {
+            const imageBytes = new Uint8Array(save.thumbnail);
 
-          const imageBlob = new Blob([imageBytes], {
-            type: "image/bmp",
-          });
+            const imageBlob = new Blob([imageBytes], {
+              type: "image/bmp",
+            });
 
-          thumbnailUrl = URL.createObjectURL(imageBlob);
-          imageUrls.push(thumbnailUrl);
+            thumbnailUrl = URL.createObjectURL(imageBlob);
+            imageUrls.push(thumbnailUrl);
+          }
+
+          return {
+            ...save,
+            thumbnailUrl,
+          };
+        });
+
+        if (isMounted) {
+          setSaveSlots(formattedSaves);
         }
+      } catch (error) {
+        console.error("Save detection failed:", error);
 
-        return {
-          ...save,
-          thumbnailUrl,
-        };
-      });
-
-      if (isMounted) {
-        setSaveSlots(formattedSaves);
-      }
-    } catch (error) {
-      console.error("Save detection failed:", error);
-
-      if (isMounted) {
-        setSaveError(String(error));
-      }
-    } finally {
-      if (isMounted) {
-        setSaveLoading(false);
+        if (isMounted) {
+          setSaveError(String(error));
+        }
+      } finally {
+        if (isMounted) {
+          setSaveLoading(false);
+        }
       }
     }
-  }
 
-  loadSaveSlots();
+    loadSaveSlots();
 
-  return () => {
-    isMounted = false;
-    imageUrls.forEach((url) => URL.revokeObjectURL(url));
-  };
-}, []);
+    return () => {
+      isMounted = false;
+      imageUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   // Track total playtime
   useEffect(() => {
@@ -595,7 +689,7 @@ useEffect(() => {
           </section>
         )}
 
-             {/* PLAYTHROUGHS */}
+        {/* PLAYTHROUGHS */}
         {activePage === "Playthroughs" && (
           <section className="page">
             {selectedSave ? (
@@ -603,7 +697,7 @@ useEffect(() => {
                 <div className="playthrough-heading">
                   <button
                     className="back-button pixel"
-                    onClick={() => setSelectedSave(null)}
+                    onClick={handleBackToSaveSelection}
                     type="button"
                   >
                     <PixelIcon name="cursor" />
@@ -630,93 +724,172 @@ useEffect(() => {
                   </div>
                 </div>
 
-                <h2 className="section-title">Adventure Progress</h2>
-
-                <div className="stats-grid">
+                {detailsLoading ? (
+                  <div className="pixel stat-card tone-lavender">
+                    <h2>Loading playthrough details...</h2>
+                    <span>Reading the selected save file.</span>
+                  </div>
+                ) : detailsError ? (
                   <div className="pixel stat-card tone-pink">
-                    <span className="stat-icon">
-                      <PixelIcon name="book" />
-                    </span>
-                    <p>CHAPTER</p>
-                    <h2>Chapter 1</h2>
-                    <span>Placeholder data</span>
+                    <h2>Unable to load save details</h2>
+                    <p>{detailsError}</p>
+                    <button
+                      className="save-note-button"
+                      onClick={() => handleSelectSave(selectedSave)}
+                    >
+                      Try Again
+                    </button>
                   </div>
+                ) : playthroughDetails ? (
+                  <>
+                    <h2 className="section-title">Adventure Progress</h2>
 
+                    <div className="stats-grid">
+                      <div className="pixel stat-card tone-pink">
+                        <span className="stat-icon">
+                          <PixelIcon name="book" />
+                        </span>
+                        <p>CHAPTER</p>
+                        <h2>
+                          {playthroughDetails.chapter !== null
+                            ? `Chapter ${playthroughDetails.chapter}`
+                            : "Unknown"}
+                        </h2>
+                        <span>Current chapter</span>
+                      </div>
+
+                      <div className="pixel stat-card tone-lavender">
+                        <span className="stat-icon">
+                          <PixelIcon name="game" />
+                        </span>
+                        <p>TOWN PROGRESSION</p>
+                        <h2>
+                          {playthroughDetails.town_progress !== null
+                            ? playthroughDetails.town_progress
+                            : "Unknown"}
+                        </h2>
+                        <span>Progression value from save file</span>
+                      </div>
+
+                      <div className="pixel stat-card tone-butter">
+                        <span className="stat-icon">
+                          <PixelIcon name="star" />
+                        </span>
+                        <p>DIFFICULTY</p>
+                        <h2>
+                          {playthroughDetails.difficulty.label ?? "Unknown"}
+                        </h2>
+                        <span>
+                         {playthroughDetails.difficulty.copies_agree
+                          ? "Difficulty values agree"
+                          : "Difficulty mirror values differ"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <h2 className="section-title">Character Status</h2>
+
+                    <div className="stats-grid">
+                      <div className="pixel stat-card tone-mint">
+                        <span className="stat-icon">
+                          <PixelIcon name="heart" />
+                        </span>
+                        <p>HEALTH (HP)</p>
+                        <h2>
+                          {playthroughDetails.hp !== null
+                            ? playthroughDetails.hp
+                            : "Unknown"}
+                        </h2>
+                        <span>Stored HP value</span>
+                      </div>
+
+                      <div className="pixel stat-card tone-lavender">
+                        <span className="stat-icon">
+                          <PixelIcon name="star" />
+                        </span>
+                        <p>MANA (MP)</p>
+                        <h2>
+                          {playthroughDetails.mp !== null
+                            ? playthroughDetails.mp
+                            : "Unknown"}
+                        </h2>
+                        <span>Stored MP value</span>
+                      </div>
+                    </div>
+
+                    <h2 className="section-title">Completion</h2>
+
+                    <div className="pixel completion-panel">
+                      <div className="completion-item">
+                        <div className="completion-heading">
+                          <strong>Map Completion</strong>
+                          <span>
+                            {playthroughDetails.map_completion !== null
+                              ? `${playthroughDetails.map_completion}%`
+                              : "Unknown"}
+                          </span>
+                        </div>
+                        <div className="completion-track">
+                          <div
+                            className="completion-fill map-fill"
+                            style={{
+                              width: `${Math.min(
+                                100,
+                                Math.max(
+                                  0,
+                                  playthroughDetails.map_completion ?? 0
+                                )
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="completion-item">
+                        <div className="completion-heading">
+                          <strong>Item Completion</strong>
+                          <span>
+                            {playthroughDetails.item_completion !== null
+                              ? `${playthroughDetails.item_completion}%`
+                              : "Unknown"}
+                          </span>
+                        </div>
+                        <div className="completion-track">
+                          <div
+                            className="completion-fill item-fill"
+                            style={{
+                              width: `${Math.min(
+                                100,
+                                Math.max(
+                                  0,
+                                  playthroughDetails.item_completion ?? 0
+                                )
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {playthroughDetails.warnings.length > 0 && (
+                        <div className="placeholder-notice">
+                          <strong>Save file warnings:</strong>
+                          <ul>
+                            {playthroughDetails.warnings.map(
+                              (warning, index) => (
+                                <li key={index}>{warning}</li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
                   <div className="pixel stat-card tone-lavender">
-                    <span className="stat-icon">
-                      <PixelIcon name="game" />
-                    </span>
-                    <p>CURRENT AREA</p>
-                    <h2>Rabi-Ribi Town</h2>
-                    <span>Placeholder data</span>
+                    <h2>No details available</h2>
+                    <span>The save parser did not return any details.</span>
                   </div>
-
-                  <div className="pixel stat-card tone-butter">
-                    <span className="stat-icon">
-                      <PixelIcon name="star" />
-                    </span>
-                    <p>DIFFICULTY</p>
-                    <h2>Normal</h2>
-                    <span>Placeholder data</span>
-                  </div>
-                </div>
-
-                <h2 className="section-title">Character Status</h2>
-
-                <div className="stats-grid">
-                  <div className="pixel stat-card tone-mint">
-                    <span className="stat-icon">
-                      <PixelIcon name="heart" />
-                    </span>
-                    <p>HEALTH (HP)</p>
-                    <h2>500 / 500</h2>
-                    <span>Placeholder data</span>
-                  </div>
-
-                  <div className="pixel stat-card tone-lavender">
-                    <span className="stat-icon">
-                      <PixelIcon name="star" />
-                    </span>
-                    <p>MANA (MP)</p>
-                    <h2>100 / 100</h2>
-                    <span>Placeholder data</span>
-                  </div>
-                </div>
-
-                <h2 className="section-title">Completion</h2>
-
-                <div className="pixel completion-panel">
-                  <div className="completion-item">
-                    <div className="completion-heading">
-                      <strong>Map Completion</strong>
-                      <span>25%</span>
-                    </div>
-                    <div className="completion-track">
-                      <div
-                        className="completion-fill map-fill"
-                        style={{ width: "25%" }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="completion-item">
-                    <div className="completion-heading">
-                      <strong>Item Completion</strong>
-                      <span>40%</span>
-                    </div>
-                    <div className="completion-track">
-                      <div
-                        className="completion-fill item-fill"
-                        style={{ width: "40%" }}
-                      />
-                    </div>
-                  </div>
-
-                  <p className="placeholder-notice">
-                    These statistics are examples only. Actual save-file
-                    information will be implemented later.
-                  </p>
-                </div>
+                )}
               </>
             ) : (
               <>
@@ -731,7 +904,7 @@ useEffect(() => {
                   slots={saveSlots}
                   loading={saveLoading}
                   error={saveError}
-                  onSelect={setSelectedSave}
+                  onSelect={handleSelectSave}
                 />
               </>
             )}

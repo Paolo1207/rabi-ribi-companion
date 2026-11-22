@@ -1,9 +1,10 @@
 
 use serde::Serialize;
-use std::fs::{self, File};
-use std::io::{Read, Seek, SeekFrom};
-use std::path::PathBuf;
+use std::fs;
+use std::path::{Path, PathBuf};
 use sysinfo::{ProcessesToUpdate, System};
+
+mod save_parser;
 
 const RABI_RIBI_EXE: &str =
     r"C:\Program Files (x86)\Steam\steamapps\common\Rabi-Ribi\rabiribi.exe";
@@ -11,12 +12,11 @@ const RABI_RIBI_EXE: &str =
 const SAVE_FOLDER: &str =
     r"C:\Program Files (x86)\Steam\steamapps\common\Rabi-Ribi\save";
 
-const SPEEDRUN_FLAG_OFFSET: u64 = 0x9A2C;
-
 #[derive(Serialize)]
 struct SaveSlot {
     slot: u32,
     file_name: String,
+    path: String,
     last_modified: u64,
     thumbnail: Option<Vec<u8>>,
     game_mode: String,
@@ -27,11 +27,10 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
-// Check whether Rabi-Ribi is currently running
+// Check whether Rabi-Ribi is currently running.
 #[tauri::command]
 fn check_rabi_ribi() -> bool {
     let mut system = System::new();
-
     system.refresh_processes(ProcessesToUpdate::All, true);
 
     system.processes().values().any(|process| {
@@ -42,28 +41,15 @@ fn check_rabi_ribi() -> bool {
     })
 }
 
-// Read the documented Speedrun flag from the save file
-fn detect_game_mode(path: &PathBuf) -> String {
-    let result = (|| -> std::io::Result<u32> {
-        let mut file = File::open(path)?;
-
-        file.seek(SeekFrom::Start(SPEEDRUN_FLAG_OFFSET))?;
-
-        let mut bytes = [0u8; 4];
-        file.read_exact(&mut bytes)?;
-
-        Ok(u32::from_le_bytes(bytes))
-    })();
-
-    match result {
-        Ok(0) => "Story Mode / Story Mode 2 (unclassified)".to_string(),
-        Ok(1) => "Speedrun Mode".to_string(),
-        Ok(value) => format!("Unknown (flag: {})", value),
+// Read both verified mode fields through the shared save parser.
+fn detect_game_mode(path: &Path) -> String {
+    match save_parser::parse_save_file(path) {
+        Ok(details) => details.mode.unwrap_or("Unknown").to_string(),
         Err(_) => "Unknown".to_string(),
     }
 }
 
-// Find Rabi-Ribi save files and their thumbnails
+// Find Rabi-Ribi save files and their thumbnails.
 #[tauri::command]
 fn get_save_slots() -> Result<Vec<SaveSlot>, String> {
     let save_path = PathBuf::from(SAVE_FOLDER);
@@ -103,7 +89,7 @@ fn get_save_slots() -> Result<Vec<SaveSlot>, String> {
             .map(|duration| duration.as_secs())
             .unwrap_or(0);
 
-        // Only the autosave slot (0) has a thumbnail
+        // Only the autosave slot (0) has a thumbnail.
         let thumbnail = if slot_number == 0 {
             fs::read(image_path.join("save0_a.bmp")).ok()
         } else {
@@ -115,13 +101,14 @@ fn get_save_slots() -> Result<Vec<SaveSlot>, String> {
         slots.push(SaveSlot {
             slot: slot_number,
             file_name: file_name.to_string(),
+            path: path.to_string_lossy().into_owned(),
             last_modified,
             thumbnail,
             game_mode,
         });
     }
 
-    // Autosave first, followed by manual slots in numeric order
+    // Autosave first, followed by manual slots in numeric order.
     slots.sort_by_key(|save| save.slot);
 
     Ok(slots)
@@ -134,7 +121,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             check_rabi_ribi,
-            get_save_slots
+            get_save_slots,
+            save_parser::read_playthrough_details
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
