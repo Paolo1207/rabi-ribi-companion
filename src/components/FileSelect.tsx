@@ -10,11 +10,13 @@ export type FileSelectSlot = {
   game_mode: string;
 };
 
-type FileSelectProps = {
-  slots: FileSelectSlot[];
+// Generic so the caller keeps its own full save type: onSelect receives the
+// same object that was passed in `slots`, not a trimmed-down FileSelectSlot.
+type FileSelectProps<T extends FileSelectSlot> = {
+  slots: T[];
   loading: boolean;
   error: string;
-  onSelect: (save: FileSelectSlot) => void;
+  onSelect: (save: T) => void;
 };
 
 function formatModified(seconds: number): string {
@@ -46,12 +48,12 @@ function formatRelative(seconds: number): string | null {
   return "just now";
 }
 
-function FileSelect({
+function FileSelect<T extends FileSelectSlot>({
   slots,
   loading,
   error,
   onSelect,
-}: FileSelectProps) {
+}: FileSelectProps<T>) {
   const latestSlot = useMemo(() => {
     if (slots.length === 0) return null;
 
@@ -69,7 +71,7 @@ function FileSelect({
       ? selectedSlot
       : latestSlot;
 
-  function selectSave(save: FileSelectSlot) {
+  function selectSave(save: T) {
     setSelectedSlot(save.slot);
     onSelect(save);
   }
