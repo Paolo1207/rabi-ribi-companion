@@ -218,14 +218,18 @@ function FileSelect({
                       {isLatest && <span className="badge">LAST SAVED</span>}
                     </div>
 
-                    <p className="fs-file">File: {save.file_name}</p>
+                    <p className="fs-file">
+                      <span className="fs-key">File:</span> {save.file_name}
+                    </p>
 
                     <p className="fs-file">
-                      Game Mode: <strong>{save.game_mode}</strong>
+                      <span className="fs-key">Game Mode:</span>{" "}
+                      <strong>{save.game_mode}</strong>
                     </p>
 
                     <p className="fs-modified">
-                      Last modified: {formatModified(save.last_modified)}
+                      <span className="fs-key">Last modified:</span>{" "}
+                      {formatModified(save.last_modified)}
                       {relative && (
                         <span className="fs-relative">{relative}</span>
                       )}

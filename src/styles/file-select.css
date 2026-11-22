@@ -179,8 +179,8 @@
 .fs-file,
 .fs-modified {
   margin: 0;
-  font-size: var(--fs-caption);
-  color: var(--ink-soft);
+  font-size: 14px;
+  color: var(--ink);
   overflow-wrap: anywhere;
   font-family: var(--font-body);
   font-weight: 600;
@@ -189,6 +189,23 @@
 
 .fs-file {
   margin-bottom: 4px;
+}
+
+/* Silkscreen key + Nunito value: the key reads as a field label */
+.fs-key {
+  display: inline-block;
+  min-width: 128px;
+  margin-right: 4px;
+  font-family: var(--font-label);
+  font-size: var(--fs-label);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.fs-file strong {
+  font-weight: 800;
 }
 
 .fs-relative {
@@ -319,7 +336,14 @@
 
   .fs-file,
   .fs-modified {
-    font-size: 12.5px;
+    font-size: 13px;
+  }
+
+  /* Stack the key above its value so long filenames and dates fit */
+  .fs-key {
+    display: block;
+    min-width: 0;
+    margin: 0 0 1px;
   }
 
   .fs-help {
