@@ -61,7 +61,6 @@
   padding: 3px 10px;
   background: #fff;
   box-shadow: 0 0 0 2px var(--outline);
-  font-size: 12px;
 }
 
 .welcome h1 {
@@ -73,8 +72,11 @@
 .welcome p {
   margin: 0;
   max-width: 34ch;
-  font-size: 16px;
+  font-size: var(--fs-lead);
   color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 .welcome-decoration {
@@ -252,7 +254,10 @@
 .status-body > p {
   margin-bottom: 18px;
   color: var(--ink-soft);
-  font-size: 15px;
+  font-size: var(--fs-body);
+  font-family: var(--font-body);
+  font-weight: 500;
+  line-height: 1.55;
 }
 
 .status-facts {
@@ -276,15 +281,21 @@
 }
 
 .status-facts dt {
-  font-size: 14px;
+  font-size: var(--fs-label);
   color: var(--ink-soft);
+  font-family: var(--font-label);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
 }
 
 .status-facts dd {
   margin: 0;
-  font-family: var(--font-pixel);
-  font-size: 17px;
+  font-family: var(--font-body);
+  font-size: 16px;
   color: var(--ink);
+  font-weight: 800;
+  line-height: 1.35;
 }
 
 /* ---------- Session History ---------- */
@@ -338,17 +349,21 @@
 }
 
 .session-date span {
-  font-family: var(--font-pixel);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-family: var(--font-label);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--lavender-deep);
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 .session-date strong {
-  font-family: var(--font-pixel);
+  font-family: var(--font-display);
   font-size: 26px;
   line-height: 1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .session-main {
@@ -364,23 +379,29 @@
   margin: 0 0 4px;
   font-size: 14px;
   color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-weight: 500;
+  line-height: 1.5;
 }
 
 .session-main small {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: var(--mint-deep);
-  font-weight: 600;
+  font-weight: 700;
+  font-family: var(--font-body);
+  line-height: 1.4;
 }
 
 .session-duration {
   padding: 6px 12px;
-  font-family: var(--font-pixel);
+  font-family: var(--font-display);
   font-size: 16px;
   font-weight: 600;
   white-space: nowrap;
   color: var(--ink);
   background: var(--mint);
   box-shadow: 0 0 0 2px var(--outline);
+  font-variant-numeric: tabular-nums;
 }
 
 .session-actions {
@@ -443,18 +464,23 @@
 .note-card-content {
   flex: 1;
   margin-bottom: 0;
-  font-size: 14.5px;
-  line-height: 1.65;
+  font-size: var(--fs-body);
+  line-height: 1.6;
   color: var(--ink);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  font-family: var(--font-body);
+  font-weight: 500;
 }
 
 .note-card small {
   display: block;
   margin-top: 14px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .note-card-actions {
@@ -498,7 +524,10 @@
 .about-card p {
   margin: 0;
   color: var(--ink-soft);
-  font-size: 15px;
+  font-size: var(--fs-body);
+  font-family: var(--font-body);
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 /* ---------- Responsive tweaks ---------- */
@@ -596,10 +625,11 @@
   border-radius: 8px;
   background: #f4e8fa;
   color: #59416d;
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
   cursor: pointer;
   transition: transform 150ms ease, box-shadow 150ms ease;
 }
@@ -636,6 +666,9 @@
 
 .playthrough-summary p {
   margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: 600;
   opacity: 0.7;
 }
 
@@ -650,14 +683,19 @@
 }
 
 .playthrough-mode span {
-  font-size: 0.75rem;
-  font-weight: 700;
-  opacity: 0.7;
-  letter-spacing: 0.08em;
+  font-family: var(--font-label);
+  font-size: var(--fs-label);
+  font-weight: 400;
+  opacity: 0.8;
+  letter-spacing: var(--track-label);
+  line-height: 1.2;
 }
 
 .playthrough-mode strong {
-  font-size: 1.05rem;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.2;
   overflow-wrap: anywhere;
 }
 
@@ -682,8 +720,25 @@
 .completion-heading {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
   gap: 12px;
+}
+
+.completion-heading strong {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* The percentage reads like a HUD counter */
+.completion-heading span {
+  font-family: var(--font-num);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
 
 .completion-track {
@@ -709,6 +764,9 @@
 
 .placeholder-notice {
   margin: 0;
-  font-size: 0.85rem;
-  opacity: 0.7;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1.5;
+  opacity: 0.8;
 }

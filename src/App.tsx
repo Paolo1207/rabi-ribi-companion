@@ -750,7 +750,7 @@ async function handleSelectSave(save: SaveSlot) {
                           <PixelIcon name="book" />
                         </span>
                         <p>CHAPTER</p>
-                        <h2>
+                        <h2 className="stat-value stat-value--text">
                           {playthroughDetails.chapter !== null
                             ? `Chapter ${playthroughDetails.chapter}`
                             : "Unknown"}
@@ -763,7 +763,13 @@ async function handleSelectSave(save: SaveSlot) {
                           <PixelIcon name="game" />
                         </span>
                         <p>TOWN PROGRESSION</p>
-                        <h2>
+                        <h2
+                          className={`stat-value${
+                            playthroughDetails.town_progress === null
+                              ? " is-empty"
+                              : ""
+                          }`}
+                        >
                           {playthroughDetails.town_progress !== null
                             ? playthroughDetails.town_progress
                             : "Unknown"}
@@ -776,7 +782,7 @@ async function handleSelectSave(save: SaveSlot) {
                           <PixelIcon name="star" />
                         </span>
                         <p>DIFFICULTY</p>
-                        <h2>
+                        <h2 className="stat-value stat-value--text">
                           {playthroughDetails.difficulty.label ?? "Unknown"}
                         </h2>
                         <span>
@@ -795,7 +801,11 @@ async function handleSelectSave(save: SaveSlot) {
                           <PixelIcon name="heart" />
                         </span>
                         <p>HEALTH (HP)</p>
-                        <h2>
+                        <h2
+                          className={`stat-value stat-value--xl${
+                            playthroughDetails.hp === null ? " is-empty" : ""
+                          }`}
+                        >
                           {playthroughDetails.hp !== null
                             ? playthroughDetails.hp
                             : "Unknown"}
@@ -808,7 +818,11 @@ async function handleSelectSave(save: SaveSlot) {
                           <PixelIcon name="star" />
                         </span>
                         <p>MANA (MP)</p>
-                        <h2>
+                        <h2
+                          className={`stat-value stat-value--xl${
+                            playthroughDetails.mp === null ? " is-empty" : ""
+                          }`}
+                        >
                           {playthroughDetails.mp !== null
                             ? playthroughDetails.mp
                             : "Unknown"}
