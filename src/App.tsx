@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import FileSelect from "./components/FileSelect";
+import InteractiveWorldMap from "./components/InteractiveWorldMap";
 import { PixelIcon, type PixelIconName } from "./components/PixelIcon";
 import "./App.css";
 
@@ -897,6 +898,7 @@ async function handleSelectSave(save: SaveSlot) {
                         </div>
                       )}
                     </div>
+                         <InteractiveWorldMap savePath={selectedSave.path} />
                   </>
                 ) : (
                   <div className="pixel stat-card tone-lavender">

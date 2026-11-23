@@ -17,8 +17,9 @@
 //! not a permanent property of a playthrough: loading a save and choosing the
 //! other rule, then saving, flips it (verified on a real save).
 //!
-//! Deliberately not interpreted (no evidence yet):
-//!   * Difficulty indexes other than 0 (Casual), 3 (Hard), 4 (Hell)
+//! Difficulty indexes currently interpreted from verified saves:
+//!   * 0 Casual, 2 Normal, 3 Hard, 4 Hell, 5 BunnyExtinction
+//! Other difficulty indexes remain unknown until verified.
 //!   * Rule values other than 0/1 (Bunny Heaven / Bunny Extinction / ERINA 200%)
 //!   * Route values other than 0/1
 //!   * Whether HP / MP are current or maximum values
@@ -95,7 +96,7 @@ pub struct LabeledValue {
 pub struct DifficultyInfo {
     /// `None` if the two stored copies disagree or are invalid.
     pub raw: Option<i32>,
-    /// Only verified indexes are labelled: 0 Casual, 3 Hard, 4 Hell.
+    /// Only verified difficulty indexes receive labels.
     pub label: Option<&'static str>,
     pub copies_agree: bool,
 }
@@ -186,9 +187,11 @@ fn rules_label(raw: i32) -> Option<&'static str> {
 fn difficulty_label(raw: i32) -> Option<&'static str> {
     match raw {
         0 => Some("Casual"),
+        2 => Some("Normal"),
         3 => Some("Hard"),
         4 => Some("Hell"),
-        _ => None, // indexes 1, 2 and 5 are unverified
+        5 => Some("BunnyExtinction"),
+        _ => None, // unverified difficulty indexes remain unknown
     }
 }
 
@@ -439,7 +442,15 @@ mod tests {
 
     #[test]
     fn only_verified_difficulty_indexes_get_labels() {
-        for (idx, label) in [(0, Some("Casual")), (1, None), (2, None), (3, Some("Hard")), (4, Some("Hell")), (5, None), (9, None)] {
+        for (idx, label) in [
+            (0, Some("Casual")),
+            (1, None),
+            (2, Some("Normal")),
+            (3, Some("Hard")),
+            (4, Some("Hell")),
+            (5, Some("BunnyExtinction")),
+            (9, None),
+        ] {
             let d = parse_save_bytes(&build(0, 0, 1, 1, idx, 1, 1.0, 0, 0)).unwrap();
             assert_eq!(d.difficulty.raw, Some(idx));
             assert_eq!(d.difficulty.label, label);

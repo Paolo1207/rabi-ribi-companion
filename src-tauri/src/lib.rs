@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use sysinfo::{ProcessesToUpdate, System};
 
 mod save_parser;
+mod map_reader;
 
 const RABI_RIBI_EXE: &str =
     r"C:\Program Files (x86)\Steam\steamapps\common\Rabi-Ribi\rabiribi.exe";
@@ -114,6 +115,18 @@ fn get_save_slots() -> Result<Vec<SaveSlot>, String> {
     Ok(slots)
 }
 
+// Inspect an installed Rabi-Ribi map file.
+#[tauri::command]
+fn inspect_rabi_map(file_name: String) -> Result<map_reader::MapFileInfo, String> {
+    map_reader::inspect_map_file(&file_name)
+}
+
+// Read all layers from an installed Rabi-Ribi map file.
+#[tauri::command]
+fn read_rabi_map(file_name: String) -> Result<map_reader::MapData, String> {
+    map_reader::read_map_data(&file_name)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -122,6 +135,8 @@ pub fn run() {
             greet,
             check_rabi_ribi,
             get_save_slots,
+            inspect_rabi_map,
+            read_rabi_map,
             save_parser::read_playthrough_details
         ])
         .run(tauri::generate_context!())
