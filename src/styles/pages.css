@@ -845,14 +845,18 @@
   cursor: grabbing;
 }
 
+
 .world-map-stage {
-  width: 100%;
+  position: relative;
+  width: max-content;
   flex-shrink: 0;
   transform-origin: center center;
 }
+
 .world-map-image {
   display: block;
   width: 100%;
+  max-width: none;
   height: auto;
   object-fit: contain;
   image-rendering: pixelated;
