@@ -25,3 +25,16 @@ dist-ssr
 
 # Rust build output
 target/
+
+dist/
+area2_test_input/
+/room_*.png
+/area0_room_10_5.png
+public/maps/*_test.png
+public/maps/area0_crop_comparison.png
+public/maps/area0_difference.png
+public/maps/area0_resized_test.png
+public/maps/area0_room_7_5.png
+src-tauri/tests/local_saves/
+*.sav
+desktop.ini

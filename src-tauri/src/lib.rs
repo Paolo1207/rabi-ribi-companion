@@ -6,6 +6,7 @@ use sysinfo::{ProcessesToUpdate, System};
 
 mod save_parser;
 mod map_reader;
+mod exploration;                         // add this line
 
 const RABI_RIBI_EXE: &str =
     r"C:\Program Files (x86)\Steam\steamapps\common\Rabi-Ribi\rabiribi.exe";
@@ -137,6 +138,7 @@ pub fn run() {
             get_save_slots,
             inspect_rabi_map,
             read_rabi_map,
+            exploration::read_exploration, 
             save_parser::read_playthrough_details
         ])
         .run(tauri::generate_context!())
