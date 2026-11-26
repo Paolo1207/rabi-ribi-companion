@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import FileSelect from "./components/FileSelect";
 import InteractiveWorldMap from "./components/InteractiveWorldMap";
+import TitleBar from "./components/TitleBar";
 import { PixelIcon, type PixelIconName } from "./components/PixelIcon";
 import "./App.css";
 
@@ -471,6 +472,8 @@ async function handleSelectSave(save: SaveSlot) {
         : "idle";
 
   return (
+    <>
+    <TitleBar />
     <div className="app">
       <aside className="sidebar">
         <div className="brand">
@@ -1239,6 +1242,7 @@ async function handleSelectSave(save: SaveSlot) {
         </div>
       )}
     </div>
+    </>
   );
 }
 

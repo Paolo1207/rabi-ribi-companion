@@ -1,0 +1,97 @@
+/* =====================================================
+   TITLE BAR — custom window chrome (Tauri, decorations off)
+===================================================== */
+
+:root {
+  --titlebar-h: 36px;
+}
+
+.titlebar {
+  position: relative;
+  z-index: 1100; /* above modal backdrops so window controls always work */
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  height: var(--titlebar-h);
+  background: linear-gradient(180deg, var(--surface-pink), var(--pink-pale));
+  border-bottom: var(--px) solid var(--outline);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Icon and name ignore the pointer so presses fall through to the bar,
+   which is the drag region. */
+.titlebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding-left: 12px;
+  pointer-events: none;
+}
+
+.titlebar-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--outline);
+}
+
+.titlebar-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.titlebar-controls {
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+.titlebar-button {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  padding: 0;
+  border: 0;
+  border-left: 2px solid var(--outline-soft);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: none;
+}
+
+.titlebar-button:hover {
+  background: var(--lavender-pale);
+}
+
+.titlebar-button:active {
+  background: var(--lavender);
+}
+
+.titlebar-button--close:hover {
+  background: var(--pink-deep);
+  color: #fff;
+}
+
+.titlebar-button--close:active {
+  background: #a3366a;
+  color: #fff;
+}
+
+.titlebar-button:focus-visible {
+  outline: 2px solid var(--lavender-deep);
+  outline-offset: -4px;
+}
+
+.titlebar-glyph {
+  display: block;
+}
