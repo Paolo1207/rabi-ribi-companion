@@ -10,6 +10,7 @@ import {
   roomRect,
   type RoomId,
 } from "./roomGrid";
+import { PixelIcon } from "./PixelIcon";
 import { useExploration } from "./useExploration";
 
 type InteractiveWorldMapProps = {
@@ -31,6 +32,9 @@ function InteractiveWorldMap({ savePath }: InteractiveWorldMapProps) {
     null
   );
 
+  const [fit, setFit] = useState(1);
+
+  const viewerRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const movedRef = useRef(false);
@@ -120,6 +124,34 @@ function InteractiveWorldMap({ savePath }: InteractiveWorldMapProps) {
       cancelled = true;
     };
   }, [currentArea, areaValues, selectedRoom]);
+
+  const hasViewer = !selectedRoom && currentArea !== null && areaValues !== null;
+
+  // Presentation only: scale the world image so the whole map fits the viewer
+  // by default. "100%" therefore means "fit"; zoom, pan and reset work on top
+  // of it. Room coordinates are untouched (hit-testing uses the stage's
+  // on-screen rectangle, which already includes this scale).
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!hasViewer || !viewer) return;
+
+    const update = () => {
+      const { clientWidth, clientHeight } = viewer;
+      if (clientWidth > 0 && clientHeight > 0) {
+        setFit(
+          Math.min(
+            clientWidth / WORLD_IMAGE_WIDTH,
+            clientHeight / WORLD_IMAGE_HEIGHT
+          )
+        );
+      }
+    };
+
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(viewer);
+    return () => observer.disconnect();
+  }, [hasViewer]);
 
   const zoomIn = () => {
     setScale((current) => Math.min(current + 0.25, 4));
@@ -221,6 +253,10 @@ function InteractiveWorldMap({ savePath }: InteractiveWorldMapProps) {
 
   const hoverRect = hoveredRoom ? roomRect(hoveredRoom.rx, hoveredRoom.ry) : null;
 
+  const discoveredByArea = new Map(
+    availableAreas.map((entry) => [entry.area, entry.discovered])
+  );
+
   return (
     <section className="world-map-section">
       <div className="world-map-heading">
@@ -232,131 +268,168 @@ function InteractiveWorldMap({ savePath }: InteractiveWorldMapProps) {
       <div className="pixel world-map-container">
         {selectedRoom ? (
           <div className="room-preview">
-            <button onClick={() => setSelectedRoom(null)}>
-              ← Back to World Map
-            </button>
+            <div className="room-preview-header">
+              <button
+                className="back-button pixel"
+                onClick={() => setSelectedRoom(null)}
+                type="button"
+              >
+                <PixelIcon name="arrow-left" />
+                <span>BACK TO WORLD MAP</span>
+              </button>
 
-            <h3>
-              Area {selectedRoom.area} - Room ({selectedRoom.rx},{" "}
-              {selectedRoom.ry})
-            </h3>
+              <h3 className="section-title room-preview-title">
+                Area {selectedRoom.area} – Room ({selectedRoom.rx},{" "}
+                {selectedRoom.ry})
+              </h3>
+            </div>
 
-            {roomHasImage ? (
-              <img
-                src={`/maps/rooms/area${selectedRoom.area}/${roomKey}.webp`}
-                alt={`Rabi-Ribi Area ${selectedRoom.area} Room ${selectedRoom.rx}, ${selectedRoom.ry}`}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  maxWidth: "960px",
-                  height: "auto",
-                  margin: "20px auto",
-                  imageRendering: "pixelated",
-                }}
-              />
-            ) : (
-              <p style={{ margin: "20px" }}>
-                This room has no rendered image.
-              </p>
-            )}
+            <div className="room-preview-frame">
+              {roomHasImage ? (
+                <img
+                  className="room-preview-image"
+                  src={`/maps/rooms/area${selectedRoom.area}/${roomKey}.webp`}
+                  alt={`Rabi-Ribi Area ${selectedRoom.area} Room ${selectedRoom.rx}, ${selectedRoom.ry}`}
+                />
+              ) : (
+                <p className="world-map-message">
+                  This room has no rendered image.
+                </p>
+              )}
+            </div>
           </div>
         ) : (
           <>
             <div className="world-map-toolbar">
-              {availableAreas.length > 1 &&
-                availableAreas.map((entry) => (
-                  <button
-                    key={entry.area}
-                    onClick={() => setAreaChoice(entry.area)}
-                    title={`${entry.discovered} rooms discovered`}
-                    style={{
-                      opacity: entry.area === currentArea ? 1 : 0.6,
-                    }}
-                  >
-                    Area {entry.area}
-                  </button>
-                ))}
+              {data && data.areaCount > 0 && (
+                <div className="world-map-areas" role="group" aria-label="Areas">
+                  {Array.from({ length: data.areaCount }, (_, area) => {
+                    const discovered = discoveredByArea.get(area) ?? 0;
+                    const locked = discovered === 0;
+                    const active = area === currentArea;
+                    return (
+                      <button
+                        key={area}
+                        type="button"
+                        className={`map-tab${active ? " is-active" : ""}${
+                          locked ? " is-locked" : ""
+                        }`}
+                        onClick={() => setAreaChoice(area)}
+                        disabled={locked}
+                        aria-pressed={active}
+                        title={
+                          locked
+                            ? "Not explored yet"
+                            : `${discovered} rooms discovered`
+                        }
+                      >
+                        Area {area}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
-              <button onClick={zoomIn} title="Zoom in">
-                +
-              </button>
+              <div className="world-map-zoom" role="group" aria-label="Zoom">
+                <button
+                  type="button"
+                  className="map-tool"
+                  onClick={zoomIn}
+                  disabled={scale >= 4}
+                  title="Zoom in"
+                  aria-label="Zoom in"
+                >
+                  +
+                </button>
 
-              <span>{Math.round(scale * 100)}%</span>
+                <span className="map-zoom-value">
+                  {Math.round(scale * 100)}%
+                </span>
 
-              <button onClick={zoomOut} title="Zoom out">
-                −
-              </button>
+                <button
+                  type="button"
+                  className="map-tool"
+                  onClick={zoomOut}
+                  disabled={scale <= 0.5}
+                  title="Zoom out"
+                  aria-label="Zoom out"
+                >
+                  −
+                </button>
 
-              <button onClick={resetView} title="Reset map view">
-                Reset
-              </button>
+                <button
+                  type="button"
+                  className="map-tool map-tool--reset"
+                  onClick={resetView}
+                  title="Reset map view"
+                >
+                  Reset
+                </button>
+              </div>
             </div>
 
-            {loading && <p style={{ margin: "20px" }}>Reading save file…</p>}
+            {loading && (
+              <p className="world-map-message">Reading save file…</p>
+            )}
 
             {error && (
-              <p style={{ margin: "20px" }}>
+              <p className="world-map-message">
                 Could not read the exploration data: {error}
               </p>
             )}
 
             {!loading && !error && data && availableAreas.length === 0 && (
-              <p style={{ margin: "20px" }}>
+              <p className="world-map-message">
                 This save has no discovered rooms yet.
               </p>
             )}
 
             {currentArea !== null && areaValues && (
-              <div
-                className="world-map-viewer"
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerCancel}
-                onPointerLeave={() => setHoveredRoom(null)}
-                onWheel={handleWheel}
-              >
+              <>
                 <div
-                  ref={stageRef}
-                  className="world-map-stage"
-                  style={{
-                    position: "relative",
-                    width: WORLD_IMAGE_WIDTH,
-                    height: WORLD_IMAGE_HEIGHT,
-                    transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                  }}
+                  ref={viewerRef}
+                  className="world-map-viewer"
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerCancel}
+                  onPointerLeave={() => setHoveredRoom(null)}
+                  onWheel={handleWheel}
                 >
-                  <canvas
-                    ref={canvasRef}
-                    width={WORLD_IMAGE_WIDTH}
-                    height={WORLD_IMAGE_HEIGHT}
-                    className="world-map-image"
+                  <div
+                    ref={stageRef}
+                    className="world-map-stage"
                     style={{
-                      display: "block",
                       width: WORLD_IMAGE_WIDTH,
                       height: WORLD_IMAGE_HEIGHT,
-                      imageRendering: "pixelated",
+                      transform: `translate(${position.x}px, ${position.y}px) scale(${fit * scale})`,
                     }}
-                  />
-
-                  {hoverRect && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: hoverRect.x,
-                        top: hoverRect.y,
-                        width: hoverRect.w,
-                        height: hoverRect.h,
-                        boxSizing: "border-box",
-                        background: "rgba(255, 215, 0, 0.25)",
-                        border: "2px solid gold",
-                        pointerEvents: "none",
-                        zIndex: 2,
-                      }}
+                  >
+                    <canvas
+                      ref={canvasRef}
+                      width={WORLD_IMAGE_WIDTH}
+                      height={WORLD_IMAGE_HEIGHT}
+                      className="world-map-image"
                     />
-                  )}
+
+                    {hoverRect && (
+                      <div
+                        className="world-map-hover"
+                        style={{
+                          left: hoverRect.x,
+                          top: hoverRect.y,
+                          width: hoverRect.w,
+                          height: hoverRect.h,
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
+
+                <p className="world-map-hint">
+                  Drag to pan · Scroll to zoom · Click a discovered room to open it
+                </p>
+              </>
             )}
           </>
         )}

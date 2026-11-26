@@ -794,44 +794,163 @@
 }
 
 
+/* =====================================================
+   INTERACTIVE WORLD MAP
+   Pastel pixel panel around a dark "game screen" viewer.
+===================================================== */
+
+.world-map-section {
+  margin-top: 34px;
+}
+
+.world-map-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.world-map-heading h2 {
+  margin: 0;
+  font-size: 26px;
+  text-shadow: 2px 2px 0 var(--pink-pale);
+}
+
+.world-map-heading p {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.world-map-container {
+  --fill: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+}
+
+/* ---------- Toolbar ---------- */
+
 .world-map-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 10px 16px;
   padding: 10px;
-  background: #21182b;
-  color: white;
+  background: var(--surface-lavender);
+  box-shadow: inset 0 0 0 2px var(--outline-soft);
 }
 
-.world-map-toolbar button {
-  min-width: 34px;
-  padding: 6px 10px;
-  border: 1px solid #9b72b5;
-  border-radius: 4px;
-  background: #392747;
-  color: white;
+.world-map-areas,
+.world-map-zoom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.world-map-zoom {
+  margin-left: auto;
+}
+
+.map-tab,
+.map-tool {
+  min-height: 34px;
+  padding: 5px 9px;
+  border: 2px solid var(--outline-soft);
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
   cursor: pointer;
-  font-weight: bold;
+  transition: transform 120ms ease, background-color 120ms ease;
 }
 
-.world-map-toolbar button:hover {
-  background: #654477;
+.map-tab:hover:not(:disabled),
+.map-tool:hover:not(:disabled) {
+  background: var(--lavender-pale);
+  border-color: var(--lavender-deep);
+  transform: translateY(-1px);
 }
 
-.world-map-toolbar span {
-  min-width: 48px;
+.map-tab:active:not(:disabled),
+.map-tool:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.map-tab:focus-visible,
+.map-tool:focus-visible {
+  outline: 3px dashed var(--lavender-deep);
+  outline-offset: 2px;
+}
+
+/* Selected area: pink fill, plum outline and a hard pixel shadow */
+.map-tab.is-active {
+  background: var(--pink);
+  border-color: var(--outline);
+  box-shadow: 0 3px 0 0 var(--drop);
+}
+
+.map-tab.is-active:hover {
+  background: var(--pink);
+  border-color: var(--outline);
+}
+
+/* Areas this save has not reached yet */
+.map-tab.is-locked {
+  background: transparent;
+  border-style: dashed;
+  color: var(--ink-soft);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.map-tool {
+  min-width: 34px;
+  padding: 5px 10px;
+}
+
+.map-tool:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.map-tool--reset {
+  background: var(--surface-pink);
+}
+
+.map-zoom-value {
+  min-width: 56px;
   text-align: center;
-  font-size: 13px;
+  font-family: var(--font-num);
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
+
+/* ---------- Viewer ---------- */
 
 .world-map-viewer {
+  position: relative;
   width: 100%;
-  height: 500px;
+  aspect-ratio: 5 / 2; /* the 2000 x 800 world image */
+  min-height: 220px;
+  max-height: calc(100dvh - 300px);
   overflow: hidden;
-  background: #171717;
-  padding: 16px;
-  box-sizing: border-box;
+  background: #000;
+  box-shadow: 0 0 0 var(--px) var(--outline);
   cursor: grab;
   touch-action: none;
   overscroll-behavior: contain;
@@ -845,10 +964,8 @@
   cursor: grabbing;
 }
 
-
 .world-map-stage {
   position: relative;
-  width: max-content;
   flex-shrink: 0;
   transform-origin: center center;
 }
@@ -856,11 +973,116 @@
 .world-map-image {
   display: block;
   width: 100%;
-  max-width: none;
-  height: auto;
-  object-fit: contain;
+  height: 100%;
   image-rendering: pixelated;
   pointer-events: none;
   user-select: none;
 }
 
+.world-map-hover {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  background: rgba(249, 168, 208, 0.28);
+  border: 3px solid var(--pink);
+  pointer-events: none;
+}
+
+.world-map-hint {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.world-map-message {
+  margin: 0;
+  padding: 14px 16px;
+  background: var(--surface-pink);
+  box-shadow: inset 0 0 0 2px var(--outline-soft);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* ---------- Room preview ---------- */
+
+.room-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.room-preview-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+}
+
+.room-preview-header .back-button {
+  margin-bottom: 0;
+}
+
+.room-preview-title.section-title {
+  margin: 0;
+  min-width: 0;
+}
+
+.room-preview-frame {
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  background: var(--surface-lavender);
+  box-shadow: inset 0 0 0 2px var(--outline-soft);
+}
+
+.room-preview-image {
+  display: block;
+  width: 100%;
+  max-width: 960px;
+  height: auto;
+  margin: 0 auto;
+  image-rendering: pixelated;
+  box-shadow: 0 0 0 var(--px) var(--outline);
+}
+
+.room-preview-frame .world-map-message {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .world-map-container {
+    padding: 10px;
+  }
+
+  .world-map-toolbar {
+    padding: 8px;
+  }
+
+  .world-map-zoom {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .map-tab {
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+
+  .world-map-hint {
+    font-size: 12px;
+  }
+
+  .room-preview-frame {
+    padding: 8px;
+  }
+}
