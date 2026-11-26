@@ -38,3 +38,4 @@ public/maps/area0_room_7_5.png
 src-tauri/tests/local_saves/
 *.sav
 desktop.ini
+public/maps/rooms/
