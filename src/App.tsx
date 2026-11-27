@@ -1,6 +1,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import CharacterStatusCard from "./components/CharacterStatusCard";
 import FileSelect from "./components/FileSelect";
 import InteractiveWorldMap from "./components/InteractiveWorldMap";
 import TitleBar from "./components/TitleBar";
@@ -799,40 +800,26 @@ async function handleSelectSave(save: SaveSlot) {
 
                     <h2 className="section-title">Character Status</h2>
 
-                    <div className="stats-grid">
-                      <div className="pixel stat-card tone-mint">
-                        <span className="stat-icon">
-                          <PixelIcon name="heart" />
-                        </span>
-                        <p>HEALTH (HP)</p>
-                        <h2
-                          className={`stat-value stat-value--xl${
-                            playthroughDetails.hp === null ? " is-empty" : ""
-                          }`}
-                        >
-                          {playthroughDetails.hp !== null
-                            ? playthroughDetails.hp
-                            : "Unknown"}
-                        </h2>
-                        <span>Stored HP value</span>
-                      </div>
+                    <div className="status-grid">
+                      <CharacterStatusCard
+                        tone="lavender"
+                        name="Erina"
+                        label="HEALTH (HP)"
+                        value={playthroughDetails.hp}
+                        caption="Stored HP value"
+                        portrait="/portraits/erina.png"
+                        fallbackIcon="bunny"
+                      />
 
-                      <div className="pixel stat-card tone-lavender">
-                        <span className="stat-icon">
-                          <PixelIcon name="star" />
-                        </span>
-                        <p>MANA (MP)</p>
-                        <h2
-                          className={`stat-value stat-value--xl${
-                            playthroughDetails.mp === null ? " is-empty" : ""
-                          }`}
-                        >
-                          {playthroughDetails.mp !== null
-                            ? playthroughDetails.mp
-                            : "Unknown"}
-                        </h2>
-                        <span>Stored MP value</span>
-                      </div>
+                      <CharacterStatusCard
+                        tone="pink"
+                        name="Ribbon"
+                        label="MANA (MP)"
+                        value={playthroughDetails.mp}
+                        caption="Stored MP value"
+                        portrait="/portraits/ribbon.png"
+                        fallbackIcon="star"
+                      />
                     </div>
 
                     <h2 className="section-title">Completion</h2>

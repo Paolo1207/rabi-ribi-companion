@@ -1,0 +1,184 @@
+/* =====================================================
+   CHARACTER STATUS CARDS — Erina (HP) and Ribbon (MP)
+   Pixel panel + round portrait + 20-segment bar.
+===================================================== */
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(var(--gap) + 4px);
+}
+
+.status-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  animation: popIn 0.42s var(--ease) both;
+}
+
+.status-grid > .status-card:nth-child(2) {
+  animation-delay: 0.06s;
+}
+
+.status-card--lavender {
+  --fill: var(--surface-lavender);
+  --tone: var(--lavender);
+  --tone-pale: var(--lavender-pale);
+  --tone-deep: var(--lavender-deep);
+}
+
+.status-card--pink {
+  --fill: var(--surface-pink);
+  --tone: var(--pink);
+  --tone-pale: var(--pink-pale);
+  --tone-deep: var(--pink-deep);
+}
+
+.status-card__head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Round portrait. Falls back to a pixel icon when the image is missing. */
+.status-card__portrait {
+  --icon-accent: #fff;
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--tone);
+  box-shadow: 0 0 0 var(--px) var(--outline);
+}
+
+.status-card__portrait img {
+  width: 92%;
+  height: 92%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  user-select: none;
+}
+
+.status-card__portrait svg {
+  width: 40px;
+  height: 40px;
+}
+
+.status-card__names {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.status-card__name {
+  padding: 3px 8px;
+  background: var(--surface);
+  box-shadow: 0 0 0 2px var(--outline-soft);
+  font-family: var(--font-label);
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  color: var(--tone-deep);
+}
+
+.status-card__label {
+  margin: 0;
+  font-family: var(--font-label);
+  font-size: var(--fs-label-lg);
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
+.status-card__value {
+  margin: 0;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-num);
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  text-shadow: 2px 2px 0 var(--tone-pale);
+  overflow-wrap: anywhere;
+}
+
+.status-card__value.is-empty {
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-shadow: none;
+}
+
+/* Pixel fill bar: 20 blocks inside a plum outline */
+.status-card__bar {
+  display: flex;
+  gap: 3px;
+  box-sizing: border-box;
+  height: 26px;
+  padding: 3px;
+  background: var(--surface);
+  box-shadow: 0 0 0 var(--px) var(--outline);
+}
+
+.status-card__bar > span {
+  flex: 1 1 0;
+  min-width: 0;
+  background: rgba(106, 74, 138, 0.14);
+}
+
+.status-card__bar > span.is-on {
+  background: var(--tone-deep);
+}
+
+.status-card__caption {
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 760px) {
+  .status-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .status-card {
+    padding: 16px;
+  }
+
+  .status-card__portrait {
+    width: 64px;
+    height: 64px;
+  }
+
+  .status-card__value {
+    font-size: 44px;
+    min-height: 44px;
+  }
+
+  .status-card__value.is-empty {
+    font-size: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-card {
+    animation: none;
+  }
+}

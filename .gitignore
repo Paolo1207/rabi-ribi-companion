@@ -39,4 +39,5 @@ src-tauri/tests/local_saves/
 *.sav
 desktop.ini
 public/maps/rooms/
-Add-Content .gitignore "public/maps/area.png"
+public/maps/area[0-9].png
+public/portraits/
